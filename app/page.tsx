@@ -1,69 +1,236 @@
-import Image from "next/image";
+import { createClient } from '@/lib/supabase/server'
+import type { Product } from '@/lib/types'
+import CatalogGrid from '@/components/CatalogGrid'
+import RevealSection from '@/components/RevealSection'
+import FaqAccordion from '@/components/FaqAccordion'
+import SmoothScrollLink from '@/components/SmoothScrollLink'
 
-export default function Home() {
+const TRUST_ITEMS = [
+  {
+    label: 'Американский стандарт',
+    icon: 'M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Zm-1.2 13.4L7 11.6l1.4-1.4 2.4 2.4 4.8-4.8L17 9.2l-6.2 6.2Z',
+  },
+  {
+    label: '100% натурально',
+    icon: 'M20 4c-6 0-14 2-14 10 0 3 1.6 5 4 6-2 2-3 3-3 3h2s2-1.5 3.4-3.1c1 .1 2.1.1 3.2-.1C20.4 18.8 20 8 20 4Zm-9 12c-1.8-.8-3-2.3-3-4.5C8 6 13 5 17 5c0 4-1 9-6 11Z',
+  },
+  {
+    label: 'Сертифицировано',
+    icon: 'M9 12.7 6.7 10.4 5.3 11.8l3.7 3.7 7-7L14.6 7 9 12.7ZM12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z',
+  },
+  {
+    label: 'Доставка по Казахстану',
+    icon: 'M3 6h11v8H3V6Zm11 3h4l3 3v2h-2a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3v-1h11V9Zm1 1v2h3.5L17 10h-2Z',
+  },
+]
+
+const INGREDIENT_BENEFITS = [
+  {
+    title: 'Ежовик гребенчатый',
+    subtitle: 'Экстракт и капсулы',
+    items: ['Улучшает сон', 'Укрепляет нервную систему, снимает стресс и тревожность', 'Укрепляет память и скорость усвоения информации', 'Помогает быть собранным и в фокусе'],
+  },
+  {
+    title: 'Кордицепс',
+    subtitle: 'Экстракт из 100% плодовых тел',
+    items: ['Повышает уровень энергии и бодрости', 'Увеличивает физическую выносливость', 'Улучшает дыхание и насыщение клеток кислородом', 'Укрепляет иммунитет и ускоряет восстановление'],
+  },
+  {
+    title: 'Формула подушечек',
+    subtitle: 'Ежовик + кордицепс + рейши + чёрный тмин',
+    items: ['Фокус на 200% без сонливости', 'Снятие стресса и мгновенная концентрация', 'Чёрный тмин и витамин C — щит для иммунитета', 'Помогает отказаться от сигарет, вейпов и снюса'],
+  },
+]
+
+const REVIEWS = [
+  {
+    text: '«Слушайте, что творят ваши экстракты! Я сразу попробовала кордицепс — и через 20 минут готова марафон бежать. Сколько энергии, машаАллах! Однозначно я ваш клиент теперь и буду всем рекомендовать»',
+    author: 'Мария',
+  },
+  {
+    text: '«Очень понравился ваш продукт. Я искал что-то подобное — лёгкое пробуждение мозга, ясность и бодрость сознания. Капли с утра, кофе, и контрольный под язык — все нейроны начинают двигаться. Спасибо большое за оперативность!»',
+    author: 'Покупатель LUMO',
+  },
+]
+
+const NTIN_CODES = [
+  { name: 'Ежовик гребенчатый, капсулы 120 шт', code: '0200407433955' },
+  { name: 'Ежовик гребенчатый, жидкий экстракт 20 мл', code: '0200401232196' },
+  { name: 'Кордицепс военный, жидкий экстракт 20 мл', code: '0200401232264' },
+  { name: 'Грибные подушечки, ментол, 20 шт', code: '0200407428951' },
+]
+
+const FAQ = [
+  {
+    q: 'Как принимать экстракты и капсулы?',
+    a: 'Дозировка указана на упаковке каждого товара. Экстракт — по несколько капель растворить в воде или сразу под язык, капсулы — по инструкции на банке. Менеджер уточнит детали при подтверждении заявки.',
+  },
+  {
+    q: 'Есть ли противопоказания?',
+    a: 'Продукция изготовлена из натурального сырья, но при беременности, кормлении грудью или хронических заболеваниях рекомендуем проконсультироваться с врачом перед началом приёма.',
+  },
+  {
+    q: 'Как оформить рассрочку через Kaspi?',
+    a: 'Рассрочка Kaspi доступна на все товары — менеджер отправит ссылку на оплату после подтверждения заявки.',
+  },
+  {
+    q: 'Сколько стоит доставка?',
+    a: 'По Алматы — фиксированно 1 500 ₸. В другие регионы Казахстана — по тарифам СДЭК/почты/InDriver, точную стоимость менеджер посчитает и озвучит при подтверждении заказа.',
+  },
+  {
+    q: 'Как быстро вы свяжетесь после заявки?',
+    a: 'Обычно в течение часа в рабочее время — позвоним или напишем на номер, указанный в заявке, чтобы подтвердить заказ и договориться о доставке.',
+  },
+]
+
+export default async function Home() {
+  const supabase = await createClient()
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_available', true)
+    .order('sort_order', { ascending: true })
+
+  const { data: siteSettings } = await supabase
+    .from('site_settings')
+    .select('hero_media_url, hero_media_type')
+    .eq('id', 1)
+    .maybeSingle()
+
+  const heroMediaUrl = siteSettings?.hero_media_url
+    ?? products?.find((p) => p.is_hero && p.image_url)?.image_url
+    ?? products?.find((p) => p.image_url)?.image_url
+  const heroMediaType = siteSettings?.hero_media_url ? siteSettings.hero_media_type : 'image'
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <>
+      <section className="relative isolate flex h-96 items-end overflow-hidden sm:h-112 lg:h-128">
+        {heroMediaUrl ? (
+          <>
+            {heroMediaType === 'video' ? (
+              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%]"
+                autoPlay muted loop playsInline />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%]" />
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-paper via-paper/85 to-paper/20" />
+          </>
+        ) : (
+          <div className="hero-glow absolute inset-0" />
+        )}
+        <div className="animate-fade-up relative z-10 mx-auto w-full max-w-2xl px-5 pb-10 text-center sm:pb-14">
+          <span className="metal-text inline-block font-display text-lg font-bold tracking-[0.3em]">LUMO</span>
+          <h1 className="mt-6 font-display text-4xl font-bold leading-tight text-ink drop-shadow-lg sm:text-5xl md:text-6xl">
+            Ясность мысли.<br />Сила тела.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mx-auto mt-4 max-w-sm text-ink/90 drop-shadow-md">
+            Премиальные экстракты редких грибов и трав — ежовик гребенчатый, кордицепс и формулы для фокуса, по стандарту США
           </p>
+          <SmoothScrollLink href="#catalog"
+            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-brass px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-paper shadow-lg shadow-brass/20 transition-all duration-300 hover:scale-105 hover:shadow-brass/40">
+            Смотреть каталог
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 animate-bounce">
+              <path d="M12 5v14M5 12l7 7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </SmoothScrollLink>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="border-b border-mist/60 bg-mist/30">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-5 py-6 sm:grid-cols-4 sm:gap-6 sm:px-8 md:px-10">
+          {TRUST_ITEMS.map((item) => (
+            <div key={item.label} className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-2 sm:text-center">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-brass">
+                <path d={item.icon} />
+              </svg>
+              <span className="text-xs leading-tight text-stone sm:text-sm">{item.label}</span>
+            </div>
+          ))}
         </div>
+      </section>
+
+      <main className="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14 md:px-10">
+        {error && <p className="text-red-400">Не получилось загрузить товары: {error.message}</p>}
+        {!error && <CatalogGrid products={(products as Product[]) ?? []} />}
+
+        <RevealSection className="mt-24">
+          <p className="text-sm uppercase tracking-widest text-stone">Преимущества</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Что даёт каждый компонент</h2>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {INGREDIENT_BENEFITS.map((group) => (
+              <div key={group.title} className="card-glow rounded-lg bg-mist p-6 sm:p-7">
+                <h3 className="font-display text-xl text-ink">{group.title}</h3>
+                <p className="mt-1 text-xs uppercase tracking-wide text-brass">{group.subtitle}</p>
+                <ul className="mt-5 flex flex-col gap-3">
+                  {group.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-stone">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brass" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </RevealSection>
+
+        <RevealSection className="mt-24">
+          <p className="text-sm uppercase tracking-widest text-stone">Отзывы</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Что говорят клиенты</h2>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {REVIEWS.map((review) => (
+              <div key={review.author} className="card-glow rounded-lg bg-mist p-6 sm:p-7">
+                <p className="text-brass">★★★★★</p>
+                <p className="mt-3 leading-relaxed text-stone">{review.text}</p>
+                <p className="mt-4 text-sm text-ink">— {review.author}</p>
+              </div>
+            ))}
+          </div>
+        </RevealSection>
+
+        <RevealSection className="mt-24 rounded-lg bg-mist p-8 sm:p-12">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:items-center">
+            <div>
+              <p className="text-sm uppercase tracking-widest text-stone">О бренде</p>
+              <h2 className="mt-2 font-display text-3xl font-bold text-ink">LUMO</h2>
+              <p className="mt-4 leading-relaxed text-stone">
+                LUMO производит функциональные концентраты из редких грибов и трав по американскому стандарту качества.
+                Каждая партия — полностью натуральное, сертифицированное сырьё, без лишних добавок. Наша цель — ясность
+                мышления и сила тела без стимуляторов и компромиссов.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded bg-paper px-4 py-6 text-center">
+                <p className="font-display text-2xl font-bold text-brass">🇺🇸</p>
+                <p className="mt-2 text-xs uppercase tracking-wide text-stone">Американский стандарт</p>
+              </div>
+              <div className="rounded bg-paper px-4 py-6 text-center">
+                <p className="font-display text-2xl font-bold text-brass">100%</p>
+                <p className="mt-2 text-xs uppercase tracking-wide text-stone">Натуральное сырьё</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-paper/60 pt-8">
+            <p className="text-xs uppercase tracking-wide text-stone">Проверка подлинности — NTIN-код товара</p>
+            <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
+              {NTIN_CODES.map((item) => (
+                <div key={item.code} className="flex items-center justify-between gap-4 border-b border-paper/40 py-2 text-sm">
+                  <span className="text-stone">{item.name}</span>
+                  <span className="whitespace-nowrap font-mono text-ink">{item.code}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </RevealSection>
+
+        <RevealSection className="mt-24 max-w-3xl">
+          <p className="text-sm uppercase tracking-widest text-stone">Вопросы</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Частые вопросы</h2>
+          <FaqAccordion items={FAQ} />
+        </RevealSection>
       </main>
-    </div>
-  );
+    </>
+  )
 }
