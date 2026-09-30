@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 
-const PHONE_NUMBER = '992554775858' // ЗАМЕНИ на свой номер: код страны без "+" и без пробелов
+const PHONE_NUMBER = '992993333366' // код страны без «+» и без пробелов
 
 export default function WhatsAppButton() {
   const pathname = usePathname()
@@ -13,7 +13,7 @@ export default function WhatsAppButton() {
       href={`https://wa.me/${PHONE_NUMBER}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brass text-paper shadow-lg shadow-black/40 transition-transform hover:scale-105"
+      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25d366] text-white shadow-lg shadow-black/40 transition-all hover:scale-105 hover:bg-[#1ebe5b]"
       aria-label="Написать в WhatsApp"
     >
       <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7">

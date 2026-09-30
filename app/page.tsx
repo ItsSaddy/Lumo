@@ -157,14 +157,14 @@ export default async function Home() {
         {heroMediaUrl ? (
           <>
             {heroMediaType === 'video' ? (
-              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-125 saturate-110"
+              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-110"
                 autoPlay muted loop playsInline />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-125 saturate-110" />
+              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-110" />
             )}
-            {/* Затемняем только низ под текстом, чтобы продукция на фоне оставалась видна */}
-            <div className="absolute inset-0 bg-linear-to-t from-paper via-paper/35 via-40% to-transparent" />
+            {/* Низ под текстом затемнён плотно, верх — слегка, чтобы продукция оставалась видна */}
+            <div className="absolute inset-0 bg-linear-to-t from-paper from-10% via-paper/75 via-55% to-paper/25" />
           </>
         ) : (
           <div className="hero-glow absolute inset-0" />
