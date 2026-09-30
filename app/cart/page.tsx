@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart-context'
 
@@ -27,10 +28,9 @@ export default function CartPage() {
       <div className="mt-8 flex flex-col gap-4">
         {items.map((item) => (
           <div key={item.id} className="card-glow flex items-center gap-4 rounded-lg bg-mist p-4">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded bg-paper">
+            <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-paper">
               {item.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                <Image src={item.image_url} alt={item.name} fill sizes="80px" className="object-cover" />
               )}
             </div>
             <div className="flex-1">

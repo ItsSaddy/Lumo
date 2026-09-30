@@ -1,9 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import Image from 'next/image'
+import { createPublicClient } from '@/lib/supabase/public'
 import type { Product } from '@/lib/types'
 import CatalogGrid from '@/components/CatalogGrid'
 import RevealSection from '@/components/RevealSection'
 import FaqAccordion from '@/components/FaqAccordion'
 import SmoothScrollLink from '@/components/SmoothScrollLink'
+import { CordycepsExtractInstruction, LionsManeCapsulesInstruction, LionsManeExtractInstruction } from '@/components/UsageInstructions'
 import BenefitAccordion, { type Benefit } from '@/components/BenefitAccordion'
 
 const TRUST_ITEMS = [
@@ -110,10 +112,9 @@ const NTIN_CODES = [
 ]
 
 const FAQ = [
-  {
-    q: 'Как принимать экстракты и капсулы?',
-    a: 'Дозировка указана на упаковке каждого товара. Экстракт — по несколько капель растворить в воде или сразу под язык, капсулы — по инструкции на банке. Менеджер уточнит детали при подтверждении заявки.',
-  },
+  { q: 'Как принимать капсулы ежовика?', a: <LionsManeCapsulesInstruction /> },
+  { q: 'Как принимать жидкий экстракт ежовика?', a: <LionsManeExtractInstruction /> },
+  { q: 'Как принимать жидкий экстракт кордицепса?', a: <CordycepsExtractInstruction /> },
   {
     q: 'Есть ли противопоказания?',
     a: 'Продукция изготовлена из натурального сырья, но при беременности, кормлении грудью или хронических заболеваниях рекомендуем проконсультироваться с врачом перед началом приёма.',
@@ -132,8 +133,11 @@ const FAQ = [
   },
 ]
 
+// Страница статическая; обновляется сразу после правок в админке и страховочно раз в час
+export const revalidate = 3600
+
 export default async function Home() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const { data: products, error } = await supabase
     .from('products')
     .select('*')
@@ -160,8 +164,8 @@ export default async function Home() {
               <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-110"
                 autoPlay muted loop playsInline />
             ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-110" />
+              <Image src={heroMediaUrl} alt="" fill preload sizes="100vw"
+                className="object-cover object-[center_68%] brightness-110" />
             )}
             {/* Низ под текстом затемнён плотно, верх — слегка, чтобы продукция оставалась видна */}
             <div className="absolute inset-0 bg-linear-to-t from-paper from-10% via-paper/75 via-55% to-paper/25" />

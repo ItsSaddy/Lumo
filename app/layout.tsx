@@ -8,7 +8,7 @@ import WhatsAppButton from '@/components/WhatsAppButton'
 
 const unbounded = Unbounded({
   subsets: ['latin', 'cyrillic'],
-  weight: ['600', '700', '800'],
+  weight: ['600', '700'],
   variable: '--font-unbounded',
   display: 'swap',
 })
@@ -21,9 +21,11 @@ const manrope = Manrope({
 
 const golos = Golos_Text({
   subsets: ['latin', 'cyrillic'],
-  weight: ['600', '700', '800', '900'],
+  weight: ['700'],
   variable: '--font-golos',
   display: 'swap',
+  // Шрифт цен нужен только ниже первого экрана — не тормозим им начальную загрузку
+  preload: false,
 })
 
 export const metadata: Metadata = {

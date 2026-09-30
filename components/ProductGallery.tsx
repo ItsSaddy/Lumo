@@ -1,8 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { useRef, useState } from 'react'
 
-export default function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
+// sizes — ширина слота на разных экранах, чтобы браузер качал фото нужного размера
+export default function ProductGallery({ images, alt, sizes }: { images: string[]; alt: string; sizes: string }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState(0)
 
@@ -12,9 +14,8 @@ export default function ProductGallery({ images, alt }: { images: string[]; alt:
 
   if (images.length === 1) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={images[0]} alt={alt}
-        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+      <Image src={images[0]} alt={alt} fill sizes={sizes}
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
     )
   }
 
@@ -36,9 +37,9 @@ export default function ProductGallery({ images, alt }: { images: string[]; alt:
       <div ref={trackRef} onScroll={handleScroll}
         className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {images.map((src, i) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={src} src={src} alt={`${alt} — фото ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'}
-            className="h-full w-full shrink-0 snap-center object-cover" />
+          <div key={src} className="relative h-full w-full shrink-0 snap-center">
+            <Image src={src} alt={`${alt} — фото ${i + 1}`} fill sizes={sizes} className="object-cover" />
+          </div>
         ))}
       </div>
 

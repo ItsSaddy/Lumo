@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
-export default function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
+export default function FaqAccordion({ items }: { items: { q: string; a: ReactNode }[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
@@ -18,9 +18,9 @@ export default function FaqAccordion({ items }: { items: { q: string; a: string 
             </button>
             <div className={`grid transition-[grid-template-rows] duration-400 ease-out ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
               <div className="overflow-hidden">
-                <p className={`pt-3 text-sm leading-relaxed text-stone transition-opacity duration-300 ${isOpen ? 'opacity-100 delay-150' : 'opacity-0'}`}>
+                <div className={`pt-3 text-sm leading-relaxed text-stone transition-opacity duration-300 ${isOpen ? 'opacity-100 delay-150' : 'opacity-0'}`}>
                   {item.a}
-                </p>
+                </div>
               </div>
             </div>
           </div>

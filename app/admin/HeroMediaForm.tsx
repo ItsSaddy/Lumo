@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { safeFilePath } from '@/lib/storage'
+import { compressImage, safeFilePath } from '@/lib/storage'
 import { updateHeroMedia } from './actions'
 
 export default function HeroMediaForm({
@@ -26,8 +26,9 @@ export default function HeroMediaForm({
 
     const mediaType: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image'
     const supabase = createClient()
-    const filePath = safeFilePath(file)
-    const { error: uploadError } = await supabase.storage.from('products').upload(filePath, file)
+    const upload = await compressImage(file)
+    const filePath = safeFilePath(upload)
+    const { error: uploadError } = await supabase.storage.from('products').upload(filePath, upload, { cacheControl: '31536000' })
 
     if (uploadError) {
       setError('Не получилось загрузить файл: ' + uploadError.message)

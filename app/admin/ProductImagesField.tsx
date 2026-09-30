@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { safeFilePath } from '@/lib/storage'
+import { compressImage, safeFilePath } from '@/lib/storage'
 
 export type PhotoItem =
   | { kind: 'url'; url: string }
@@ -21,8 +21,9 @@ export async function uploadPhotos(photos: PhotoItem[]): Promise<{ urls: string[
       urls.push(photo.url)
       continue
     }
-    const filePath = safeFilePath(photo.file)
-    const { error } = await supabase.storage.from('products').upload(filePath, photo.file)
+    const file = await compressImage(photo.file)
+    const filePath = safeFilePath(file)
+    const { error } = await supabase.storage.from('products').upload(filePath, file, { cacheControl: '31536000' })
     if (error) return { urls: [], error: 'Не получилось загрузить фото: ' + error.message }
     urls.push(supabase.storage.from('products').getPublicUrl(filePath).data.publicUrl)
   }

@@ -25,7 +25,7 @@ Lumo is a single-tenant e-commerce storefront (Russian-language UI, plant/mushro
 
 Core tables (inferred from queries, no local schema/migrations in this repo): `products`, `orders`, `order_items` (FK to `products`), plus Supabase Auth for the single admin user. Schema changes must be made directly in the Supabase project.
 
-**Auth**: [middleware.ts](middleware.ts) gates every `/admin/*` route except `/admin/login`, redirecting unauthenticated requests. Each Server Component under `/admin` additionally re-checks `supabase.auth.getUser()` and redirects itself — the middleware isn't relied on as the sole guard.
+**Auth**: [proxy.ts](proxy.ts) (Next 16's renamed middleware) gates every `/admin/*` route except `/admin/login`, redirecting unauthenticated requests. Each Server Component under `/admin` additionally re-checks `supabase.auth.getUser()` and redirects itself — the proxy isn't relied on as the sole guard.
 
 **Cart**: client-only state in [lib/cart-context.tsx](lib/cart-context.tsx) (`CartProvider`, `useCart`), persisted to `localStorage` under key `lumo-cart`. No server-side cart/session — the cart only becomes a DB row at checkout.
 
@@ -35,7 +35,7 @@ Core tables (inferred from queries, no local schema/migrations in this repo): `p
 
 **Admin**: [app/admin/actions.ts](app/admin/actions.ts) has the product CRUD Server Actions (`addProduct`/`updateProduct`/`deleteProduct`), each re-checking auth and calling `revalidatePath('/admin')` + `revalidatePath('/')` after writes. [app/admin/clients](app/admin/clients/page.tsx) lists submitted orders with their line items via a nested Supabase select.
 
-**Styling**: Tailwind v4 (CSS-based config via `@theme inline` in [app/globals.css](app/globals.css), no `tailwind.config.*`). Custom semantic color tokens: `ink`, `stone`, `brass`, `plum`, `paper`, `mist` — reuse these rather than raw Tailwind palette colors. Fonts are `next/font/google` (Playfair Display → `--font-display`, Manrope → `--font-sans`), wired up in [app/layout.tsx](app/layout.tsx).
+**Styling**: Tailwind v4 (CSS-based config via `@theme inline` in [app/globals.css](app/globals.css), no `tailwind.config.*`). Custom semantic color tokens: `ink`, `stone`, `brass`, `plum`, `paper`, `mist` — reuse these rather than raw Tailwind palette colors. Fonts are `next/font/google` (Unbounded → `--font-display`, Manrope → `--font-sans`, Golos Text → `--font-price`; only the weights actually used are loaded), wired up in [app/layout.tsx](app/layout.tsx).
 
 ## Environment variables
 

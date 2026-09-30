@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart-context'
@@ -9,7 +10,6 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [country, setCountry] = useState('')
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +24,6 @@ export default function CheckoutPage() {
     const result = await submitOrder({
       customerName: name,
       phone,
-      country,
       address,
       items: items.map((item) => ({
         id: item.productId ?? item.id,
@@ -84,10 +83,9 @@ export default function CheckoutPage() {
         <div className="flex flex-col gap-3">
           {items.map((item) => (
             <div key={item.id} className="flex items-center gap-3 text-sm">
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-paper">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-paper">
                 {item.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                  <Image src={item.image_url} alt={item.name} fill sizes="48px" className="object-cover" />
                 )}
               </div>
               <span className="flex-1 text-stone">{item.name} × {item.quantity}</span>
@@ -116,17 +114,8 @@ export default function CheckoutPage() {
             className="w-full rounded border border-stone/30 px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Страна</label>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} required
-            className="w-full rounded border border-stone/30 px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass">
-            <option value="">Выбери страну</option>
-            <option value="Казахстан">Казахстан</option>
-            <option value="Таджикистан">Таджикистан</option>
-          </select>
-        </div>
-        <div>
           <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Адрес доставки</label>
-          <input type="text" placeholder="Город, улица, дом, квартира" value={address}
+          <input type="text" placeholder="Город в Казахстане, улица, дом, квартира" value={address}
             onChange={(e) => setAddress(e.target.value)} required
             className="w-full rounded border border-stone/30 px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
         </div>

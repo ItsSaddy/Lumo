@@ -165,7 +165,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <article className="card-glow group flex flex-col overflow-hidden rounded-lg bg-mist transition-transform duration-300 hover:-translate-y-1">
       <div className="relative aspect-4/5 w-full overflow-hidden bg-paper">
-        <ProductGallery images={images} alt={product.name} />
+        <ProductGallery images={images} alt={product.name} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" />
       </div>
       <div className="flex flex-1 flex-col p-6">
         {badges}
@@ -194,7 +194,7 @@ function ProductCard({ product }: { product: Product }) {
           <div className="relative sm:grid sm:grid-cols-2">
             <div className="group relative aspect-4/5 w-full overflow-hidden bg-paper sm:aspect-auto sm:min-h-112">
               <div className="h-full w-full sm:absolute sm:inset-0">
-                <ProductGallery images={images} alt={product.name} />
+                <ProductGallery images={images} alt={product.name} sizes="(min-width: 640px) 384px, 100vw" />
               </div>
             </div>
             <div className="flex flex-col p-6 sm:p-8">

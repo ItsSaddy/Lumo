@@ -7,7 +7,6 @@ import { calculateOrderTotals } from '@/lib/discount'
 type OrderInput = {
   customerName: string
   phone: string
-  country: string
   address: string
   items: { id: string; name: string; price: number; quantity: number }[]
 }
@@ -25,7 +24,6 @@ async function notifyTelegram(order: OrderInput, totalPrice: number) {
 
 Имя: ${order.customerName}
 Телефон: ${order.phone}
-Страна: ${order.country}
 Адрес: ${order.address}
 
 ${itemsList}
@@ -55,7 +53,8 @@ export async function submitOrder(order: OrderInput) {
     id: orderId,
     customer_name: order.customerName,
     phone: order.phone,
-    country: order.country,
+    // Доставка только по Казахстану — колонку заполняем, чтобы заявки в админке выглядели единообразно
+    country: 'Казахстан',
     address: order.address,
     total_price: totalPrice,
     status: 'new',

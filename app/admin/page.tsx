@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { Product } from '@/lib/types'
@@ -71,10 +72,9 @@ export default async function AdminPage() {
             <div key={product.id}
               className="card-glow flex items-center gap-4 rounded-lg bg-mist p-4">
               <ReorderButtons id={product.id} isFirst={index === 0} isLast={index === products.length - 1} />
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded bg-paper">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded bg-paper">
                 {product.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.image_url} alt="" className="h-full w-full object-cover" />
+                  <Image src={product.image_url} alt="" fill sizes="56px" className="object-cover" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
