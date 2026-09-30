@@ -4,7 +4,9 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { calculateOrderTotals } from '@/lib/discount'
 
 type CartItem = {
+  // id — ключ строки корзины (для фасовок: `${productId}:${variant}`), productId — товар в БД
   id: string
+  productId?: string
   name: string
   price: number
   image_url: string | null

@@ -4,11 +4,12 @@ import CatalogGrid from '@/components/CatalogGrid'
 import RevealSection from '@/components/RevealSection'
 import FaqAccordion from '@/components/FaqAccordion'
 import SmoothScrollLink from '@/components/SmoothScrollLink'
+import { CORDYCEPS_BENEFITS, LIONS_MANE_BENEFITS } from '@/lib/product-info'
 
 const TRUST_ITEMS = [
   {
     label: 'Американский стандарт',
-    icon: 'M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Zm-1.2 13.4L7 11.6l1.4-1.4 2.4 2.4 4.8-4.8L17 9.2l-6.2 6.2Z',
+    flag: true,
   },
   {
     label: '100% натурально',
@@ -28,12 +29,12 @@ const INGREDIENT_BENEFITS = [
   {
     title: 'Ежовик гребенчатый',
     subtitle: 'Экстракт и капсулы',
-    items: ['Улучшает сон', 'Укрепляет нервную систему, снимает стресс и тревожность', 'Укрепляет память и скорость усвоения информации', 'Помогает быть собранным и в фокусе'],
+    items: LIONS_MANE_BENEFITS,
   },
   {
-    title: 'Кордицепс',
+    title: 'Кордицепс военный',
     subtitle: 'Экстракт из 100% плодовых тел',
-    items: ['Повышает уровень энергии и бодрости', 'Увеличивает физическую выносливость', 'Улучшает дыхание и насыщение клеток кислородом', 'Укрепляет иммунитет и ускоряет восстановление'],
+    items: CORDYCEPS_BENEFITS,
   },
   {
     title: 'Формула подушечек',
@@ -108,13 +109,14 @@ export default async function Home() {
         {heroMediaUrl ? (
           <>
             {heroMediaType === 'video' ? (
-              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%]"
+              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-125 saturate-110"
                 autoPlay muted loop playsInline />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%]" />
+              <img src={heroMediaUrl} alt="" className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-125 saturate-110" />
             )}
-            <div className="absolute inset-0 bg-linear-to-t from-paper via-paper/85 to-paper/20" />
+            {/* Затемняем только низ под текстом, чтобы продукция на фоне оставалась видна */}
+            <div className="absolute inset-0 bg-linear-to-t from-paper via-paper/35 via-40% to-transparent" />
           </>
         ) : (
           <div className="hero-glow absolute inset-0" />
@@ -141,9 +143,22 @@ export default async function Home() {
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-5 py-6 sm:grid-cols-4 sm:gap-6 sm:px-8 md:px-10">
           {TRUST_ITEMS.map((item) => (
             <div key={item.label} className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-2 sm:text-center">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-brass">
-                <path d={item.icon} />
-              </svg>
+              {'flag' in item ? (
+                <svg viewBox="0 0 38 20" className="h-4 w-7 shrink-0 rounded-[2px] sm:my-1" aria-hidden>
+                  <rect width="38" height="20" fill="#b22234" />
+                  {[1, 3, 5, 7, 9, 11].map((row) => (
+                    <rect key={row} y={(row * 20) / 13} width="38" height={20 / 13} fill="#fff" />
+                  ))}
+                  <rect width="15.2" height={(20 / 13) * 7} fill="#3c3b6e" />
+                  {[0, 1, 2, 3].map((r) => [0, 1, 2, 3, 4].map((c) => (
+                    <circle key={`${r}-${c}`} cx={1.6 + c * 3} cy={1.4 + r * 2.4} r="0.55" fill="#fff" />
+                  )))}
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-brass">
+                  <path d={item.icon} />
+                </svg>
+              )}
               <span className="text-xs leading-tight text-stone sm:text-sm">{item.label}</span>
             </div>
           ))}

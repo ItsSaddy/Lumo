@@ -27,7 +27,7 @@ export default function CheckoutPage() {
       country,
       address,
       items: items.map((item) => ({
-        id: item.id,
+        id: item.productId ?? item.id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
