@@ -3,7 +3,8 @@
 import { useState, useTransition, ViewTransition } from 'react'
 import type { Product } from '@/lib/types'
 import AddToCartButton from '@/components/AddToCartButton'
-import { getProductBenefits, getProductVariants } from '@/lib/product-info'
+import ProductGallery from '@/components/ProductGallery'
+import { getProductBenefits, getProductImages, getProductVariants } from '@/lib/product-info'
 
 const CATEGORIES = ['Все', 'Экстракты', 'Капсулы', 'Подушечки']
 const POUCH_CATEGORY = 'Подушечки'
@@ -110,13 +111,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <article className="card-glow group overflow-hidden rounded-lg bg-mist transition-transform duration-300 hover:-translate-y-1">
       <div className="relative aspect-4/5 w-full overflow-hidden bg-paper">
-        {product.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image_url} alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-stone">нет фото</div>
-        )}
+        <ProductGallery images={getProductImages(product)} alt={product.name} />
       </div>
       <div className="p-6">
         <div className="flex flex-wrap gap-1.5">

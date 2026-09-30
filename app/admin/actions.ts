@@ -3,13 +3,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+// Колонку products.images добавляют вручную в Supabase — без неё сохранение падает с непонятной ошибкой
+function productError(error: { code?: string; message: string }) {
+  if (error.code === 'PGRST204' && error.message.includes('images')) {
+    return 'В базе нет колонки для нескольких фото — выполните SQL из инструкции в Supabase (SQL Editor)'
+  }
+  return error.message
+}
+
 type ProductInput = {
   name: string
   description: string
   price: number
   category: string
   spec: string
-  image_url: string | null
+  images: string[]
   is_available?: boolean
   is_hero?: boolean
 }
@@ -31,11 +39,12 @@ export async function addProduct(product: ProductInput) {
     description: product.description || null,
     price: product.price,
     category: product.category || null,
-    image_url: product.image_url,
+    image_url: product.images[0] ?? null,
+    images: product.images,
     sort_order: (lastProduct?.sort_order ?? 0) + 1,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: productError(error) }
 
   revalidatePath('/admin')
   revalidatePath('/')
@@ -60,13 +69,14 @@ export async function updateProduct(id: string, product: ProductInput) {
       description: product.description || null,
       price: product.price,
       category: product.category || null,
-      image_url: product.image_url,
+      image_url: product.images[0] ?? null,
+      images: product.images,
       is_available: product.is_available,
       is_hero: product.is_hero ?? false,
     })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) return { error: productError(error) }
 
   revalidatePath('/admin')
   revalidatePath('/')

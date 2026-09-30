@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { safeFilePath } from '@/lib/storage'
 import { addProduct } from './actions'
+import ProductImagesField, { uploadPhotos, type PhotoItem } from './ProductImagesField'
 
 export default function AddProductForm() {
   const [name, setName] = useState('')
@@ -12,7 +11,7 @@ export default function AddProductForm() {
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('')
   const [spec, setSpec] = useState('')
-  const [file, setFile] = useState<File | null>(null)
+  const [photos, setPhotos] = useState<PhotoItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -22,23 +21,11 @@ export default function AddProductForm() {
     setLoading(true)
     setError(null)
 
-    let imageUrl: string | null = null
-
-    if (file) {
-      const supabase = createClient()
-      const filePath = safeFilePath(file)
-      const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        setError('Не получилось загрузить фото: ' + uploadError.message)
-        setLoading(false)
-        return
-      }
-
-      const { data } = supabase.storage.from('products').getPublicUrl(filePath)
-      imageUrl = data.publicUrl
+    const { urls, error: uploadError } = await uploadPhotos(photos)
+    if (uploadError) {
+      setError(uploadError)
+      setLoading(false)
+      return
     }
 
     const result = await addProduct({
@@ -47,7 +34,7 @@ export default function AddProductForm() {
       price: parseFloat(price),
       category,
       spec,
-      image_url: imageUrl,
+      images: urls,
     })
 
     if (result?.error) {
@@ -61,7 +48,7 @@ export default function AddProductForm() {
     setPrice('')
     setCategory('')
     setSpec('')
-    setFile(null)
+    setPhotos([])
     setLoading(false)
     router.refresh()
   }
@@ -102,12 +89,7 @@ export default function AddProductForm() {
           onChange={(e) => setSpec(e.target.value)}
           className="w-full rounded border border-stone/30 bg-paper px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
       </div>
-      <div>
-        <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Фото</label>
-        <input type="file" accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-stone file:mr-3 file:rounded file:border-0 file:bg-brass/15 file:px-3 file:py-2 file:text-xs file:font-medium file:uppercase file:tracking-wide file:text-brass" />
-      </div>
+      <ProductImagesField photos={photos} onChange={setPhotos} />
       {error && <p className="text-sm text-red-400">{error}</p>}
       <button type="submit" disabled={loading}
         className="mt-2 rounded-full bg-brass py-3 text-sm font-semibold uppercase tracking-[0.15em] text-paper transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100">

@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { safeFilePath } from '@/lib/storage'
 import { updateProduct } from './actions'
 import type { Product } from '@/lib/types'
+import { getProductImages } from '@/lib/product-info'
+import ProductImagesField, { photosFromUrls, uploadPhotos, type PhotoItem } from './ProductImagesField'
 
 export default function EditProductForm({ product }: { product: Product }) {
   const [name, setName] = useState(product.name)
@@ -15,7 +15,7 @@ export default function EditProductForm({ product }: { product: Product }) {
   const [spec, setSpec] = useState(product.spec ?? '')
   const [isAvailable, setIsAvailable] = useState(product.is_available)
   const [isHero, setIsHero] = useState(product.is_hero)
-  const [file, setFile] = useState<File | null>(null)
+  const [photos, setPhotos] = useState<PhotoItem[]>(() => photosFromUrls(getProductImages(product)))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -25,23 +25,11 @@ export default function EditProductForm({ product }: { product: Product }) {
     setLoading(true)
     setError(null)
 
-    let imageUrl = product.image_url
-
-    if (file) {
-      const supabase = createClient()
-      const filePath = safeFilePath(file)
-      const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        setError('Не получилось загрузить фото: ' + uploadError.message)
-        setLoading(false)
-        return
-      }
-
-      const { data } = supabase.storage.from('products').getPublicUrl(filePath)
-      imageUrl = data.publicUrl
+    const { urls, error: uploadError } = await uploadPhotos(photos)
+    if (uploadError) {
+      setError(uploadError)
+      setLoading(false)
+      return
     }
 
     const result = await updateProduct(product.id, {
@@ -50,7 +38,7 @@ export default function EditProductForm({ product }: { product: Product }) {
       price: parseFloat(price),
       category,
       spec,
-      image_url: imageUrl,
+      images: urls,
       is_available: isAvailable,
       is_hero: isHero,
     })
@@ -67,10 +55,6 @@ export default function EditProductForm({ product }: { product: Product }) {
 
   return (
     <form onSubmit={handleSubmit} className="card-glow mt-8 flex flex-col gap-4 rounded-lg bg-mist p-6 sm:p-8">
-      {product.image_url && !file && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={product.image_url} alt="" className="h-40 w-40 rounded object-cover" />
-      )}
       <div>
         <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Название</label>
         <input type="text" value={name}
@@ -113,14 +97,9 @@ export default function EditProductForm({ product }: { product: Product }) {
       <label className="flex items-center gap-2 text-sm text-stone">
         <input type="checkbox" checked={isHero}
           onChange={(e) => setIsHero(e.target.checked)} />
-        Показывать это фото фоном на главной
+        Показывать главное фото фоном на главной
       </label>
-      <div>
-        <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Заменить фото (необязательно)</label>
-        <input type="file" accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="w-full text-sm text-stone file:mr-3 file:rounded file:border-0 file:bg-brass/15 file:px-3 file:py-2 file:text-xs file:font-medium file:uppercase file:tracking-wide file:text-brass" />
-      </div>
+      <ProductImagesField photos={photos} onChange={setPhotos} />
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div className="mt-2 flex gap-4">
         <button type="submit" disabled={loading}

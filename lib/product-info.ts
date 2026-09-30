@@ -1,5 +1,11 @@
 import type { Product } from '@/lib/types'
 
+// Старые товары без колонки images показывают единственное image_url
+export function getProductImages(product: Pick<Product, 'image_url' | 'images'>): string[] {
+  if (product.images?.length) return product.images
+  return product.image_url ? [product.image_url] : []
+}
+
 export type ProductVariant = {
   key: string
   label: string
