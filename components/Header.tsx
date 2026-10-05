@@ -9,7 +9,8 @@ const NAV = [
   { href: '/shop', label: 'Магазин' },
 ]
 
-const LINK_CLASS = 'text-xs uppercase tracking-[0.2em] transition-colors hover:text-ink'
+// На телефоне чуть мельче — рядом с логотипом и подписью навигация должна влезть в 360px
+const LINK_CLASS = 'text-[11px] uppercase tracking-[0.14em] transition-colors hover:text-ink sm:text-xs sm:tracking-[0.2em]'
 
 export default function Header() {
   const pathname = usePathname()
@@ -18,9 +19,16 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-mist/60 bg-paper/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8 sm:py-6 md:px-10">
-        <Link href="/" className="metal-text font-display text-xl font-bold tracking-[0.15em] sm:text-2xl">LUMO</Link>
-        <nav className="flex items-center gap-5 sm:gap-8">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 sm:gap-4 sm:px-8 sm:py-5 md:px-10">
+        {/* Подпись по ширине почти равна слову LUMO; отрицательный отступ справа убирает хвост letter-spacing, чтобы строки центрировались ровно */}
+        <Link href="/" aria-label="LUMO — Premium Mushroom Extracts" className="flex min-w-0 flex-col items-center leading-none">
+          <span className="logo-text mr-[-0.22em] font-display text-[1.75rem] font-bold tracking-[0.22em] sm:mr-[-0.3em] sm:text-4xl sm:tracking-[0.3em]">LUMO</span>
+          <span aria-hidden className="mt-1.5 h-px w-full bg-linear-to-r from-transparent via-brass/60 to-transparent sm:mt-2" />
+          <span className="mr-[-0.14em] mt-1 text-center text-[7px] font-semibold uppercase tracking-[0.14em] text-brass sm:mr-[-0.16em] sm:mt-1.5 sm:text-[9px] sm:tracking-[0.16em]">
+            Premium Mushroom Extracts
+          </span>
+        </Link>
+        <nav className="flex shrink-0 items-center gap-4 sm:gap-8">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href}
               className={`${LINK_CLASS} ${pathname === item.href ? 'text-brass' : 'text-stone'}`}>

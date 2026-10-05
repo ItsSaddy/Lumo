@@ -190,9 +190,7 @@ export default async function Home() {
           <div className="hero-glow absolute inset-0" />
         )}
         <div className="animate-fade-up relative z-10 mx-auto w-full max-w-2xl px-5 pb-8 pt-12 text-center sm:pb-14 sm:pt-16">
-          {/* На телефоне логотип уже в шапке прямо над этим блоком */}
-          <span className="metal-text hidden font-display text-lg font-bold tracking-[0.3em] sm:inline-block">LUMO</span>
-          <h1 className="font-display text-4xl font-bold leading-tight text-ink drop-shadow-lg sm:mt-6 sm:text-5xl md:text-6xl">
+          <h1 className="font-display text-4xl font-bold leading-tight text-ink drop-shadow-lg sm:text-5xl md:text-6xl">
             Ясность мысли.<br />Сила тела.
           </h1>
           <p className="mx-auto mt-4 max-w-sm text-ink/90 drop-shadow-md">
@@ -251,20 +249,22 @@ export default async function Home() {
               ))}
             </div>
 
+            {/* Рядом с яркими фото наборов плашка в цвет фона терялась — даём ей золотую рамку, подсветку и явную кнопку */}
             <Link href="/shop"
-              className="group mt-6 flex items-center gap-4 rounded-lg border border-mist bg-paper px-5 py-5 transition-colors hover:border-brass/50 sm:px-6">
+              className="card-glow group mt-6 flex items-center gap-4 rounded-lg border border-brass/40 bg-linear-to-r from-brass/15 via-mist to-mist px-5 py-5 transition-colors hover:border-brass sm:px-6 sm:py-6">
               <div className="hidden shrink-0 -space-x-3 sm:flex">
                 {singles.filter((p) => p.image_url).slice(0, 4).map((p) => (
-                  <span key={p.id} className="relative h-11 w-11 overflow-hidden rounded-full bg-mist ring-2 ring-paper">
-                    <Image src={p.image_url!} alt="" fill sizes="44px" className="object-cover" />
+                  <span key={p.id} className="relative h-12 w-12 overflow-hidden rounded-full bg-paper ring-2 ring-brass/40">
+                    <Image src={p.image_url!} alt="" fill sizes="48px" className="object-cover" />
                   </span>
                 ))}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-display text-base text-ink sm:text-lg">Нужен один продукт?</p>
-                <p className="mt-1 text-sm text-stone">Экстракты, капсулы и паучи по отдельности — в магазине</p>
+                <p className="font-display text-lg text-ink sm:text-xl">Нужен один продукт?</p>
+                <p className="mt-1 text-sm text-ink/70">Экстракты, капсулы и паучи по отдельности — в магазине</p>
               </div>
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mist text-brass transition-transform duration-300 group-hover:translate-x-1">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center gap-2 rounded-full bg-brass text-paper shadow-lg shadow-brass/20 transition-transform duration-300 group-hover:translate-x-1 sm:h-auto sm:w-auto sm:px-5 sm:py-3">
+                <span className="hidden text-xs font-semibold uppercase tracking-[0.2em] sm:inline">В магазин</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden>
                   <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -277,7 +277,8 @@ export default async function Home() {
           <StateTimeline ctaHref={hasBundles ? '#sets' : undefined} />
         </RevealSection>
 
-        <RevealSection className="mt-24">
+        {/* Сюда ведёт кнопка «Подробнее» в карточках наборов */}
+        <RevealSection id="benefits" className="mt-24">
           <p className="text-sm uppercase tracking-widest text-stone">Преимущества</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Что даёт каждый компонент</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">

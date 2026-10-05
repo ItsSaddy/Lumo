@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react'
 
-export default function RevealSection({ children, className = '' }: { children: ReactNode; className?: string }) {
+export default function RevealSection({ children, className = '', id }: { children: ReactNode; className?: string; id?: string }) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function RevealSection({ children, className = '' }: { children: 
   }, [])
 
   return (
-    <div ref={ref} className={`reveal ${className}`}>
+    <div ref={ref} id={id} className={`reveal ${className}`}>
       {children}
     </div>
   )
