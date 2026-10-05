@@ -17,12 +17,6 @@ html {
   scroll-padding-top: 5.5rem;
 }
 
-@media (min-width: 40rem) {
-  html {
-    scroll-padding-top: 7rem;
-  }
-}
-
 body {
   background-color: var(--color-paper);
   color: var(--color-ink);
@@ -44,15 +38,6 @@ textarea {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* Главный логотип в шапке — тот же металл, но теплее, золотом, и с мягким свечением */
-.logo-text {
-  background: linear-gradient(180deg, #fff4dc 0%, #f1cf86 38%, #b98a3a 52%, #e9c47c 72%, #fff1d2 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 0 14px rgba(224, 168, 56, 0.3));
 }
 
 .card-glow {

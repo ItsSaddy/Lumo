@@ -19,16 +19,16 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-mist/60 bg-paper/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 sm:gap-4 sm:px-8 sm:py-5 md:px-10">
-        {/* Подпись по ширине почти равна слову LUMO; отрицательный отступ справа убирает хвост letter-spacing, чтобы строки центрировались ровно */}
-        <Link href="/" aria-label="LUMO — Premium Mushroom Extracts" className="flex min-w-0 flex-col items-center leading-none">
-          <span className="logo-text mr-[-0.22em] font-display text-[1.75rem] font-bold tracking-[0.22em] sm:mr-[-0.3em] sm:text-4xl sm:tracking-[0.3em]">LUMO</span>
-          <span aria-hidden className="mt-1.5 h-px w-full bg-linear-to-r from-transparent via-brass/60 to-transparent sm:mt-2" />
-          <span className="mr-[-0.14em] mt-1 text-center text-[7px] font-semibold uppercase tracking-[0.14em] text-brass sm:mr-[-0.16em] sm:mt-1.5 sm:text-[9px] sm:tracking-[0.16em]">
-            Premium Mushroom Extracts
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4 sm:gap-4 sm:px-8 sm:py-6 md:px-10">
+        {/* Подпись в две строки справа от LUMO — не выше самого слова, шапка не растёт. На экранах уже 360px её некуда деть — прячем */}
+        <Link href="/" aria-label="LUMO — Premium Mushrooms" className="flex min-w-0 items-center gap-1.5 sm:gap-3">
+          <span className="metal-text font-display text-lg font-bold tracking-[0.15em] sm:text-2xl">LUMO</span>
+          <span aria-hidden className="h-5 w-px bg-stone/30 max-[359px]:hidden sm:h-6" />
+          <span className="text-[7px] font-semibold uppercase leading-[1.35] tracking-[0.2em] text-stone max-[359px]:hidden sm:text-[9px] sm:tracking-[0.25em]">
+            Premium<br />Mushrooms
           </span>
         </Link>
-        <nav className="flex shrink-0 items-center gap-4 sm:gap-8">
+        <nav className="flex shrink-0 items-center gap-3 sm:gap-8">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href}
               className={`${LINK_CLASS} ${pathname === item.href ? 'text-brass' : 'text-stone'}`}>
