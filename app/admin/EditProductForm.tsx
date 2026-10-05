@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation'
 import { updateProduct } from './actions'
 import type { Product } from '@/lib/types'
 import { getProductImages } from '@/lib/product-info'
+import { BUNDLE_CATEGORY } from '@/lib/bundles'
 import ProductImagesField, { photosFromUrls, uploadPhotos, type PhotoItem } from './ProductImagesField'
+import BundleFields, { bundleDraftFrom, type BundleDraft } from './BundleFields'
 
-export default function EditProductForm({ product }: { product: Product }) {
+// products — обычные товары, из которых собирается состав набора
+export default function EditProductForm({ product, products }: { product: Product; products: Product[] }) {
   const [name, setName] = useState(product.name)
   const [description, setDescription] = useState(product.description ?? '')
   const [price, setPrice] = useState(String(product.price))
@@ -16,14 +19,23 @@ export default function EditProductForm({ product }: { product: Product }) {
   const [isAvailable, setIsAvailable] = useState(product.is_available)
   const [isHero, setIsHero] = useState(product.is_hero)
   const [photos, setPhotos] = useState<PhotoItem[]>(() => photosFromUrls(getProductImages(product)))
+  const [bundle, setBundle] = useState<BundleDraft>(() => bundleDraftFrom(product))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const isBundleForm = category === BUNDLE_CATEGORY
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Проверяем до загрузки фото, чтобы не оставлять в Storage лишних файлов
+    if (isBundleForm && !bundle.items.some((item) => !item.gift)) {
+      setError('Добавьте в набор хотя бы один продукт, который не идёт в подарок')
+      setLoading(false)
+      return
+    }
 
     const { urls, error: uploadError } = await uploadPhotos(photos)
     if (uploadError) {
@@ -41,6 +53,7 @@ export default function EditProductForm({ product }: { product: Product }) {
       images: urls,
       is_available: isAvailable,
       is_hero: isHero,
+      bundle: isBundleForm ? { items: bundle.items, badge: bundle.badge } : undefined,
     })
 
     if (result?.error) {
@@ -81,11 +94,15 @@ export default function EditProductForm({ product }: { product: Product }) {
           <option value="Экстракты">Экстракты</option>
           <option value="Капсулы">Капсулы</option>
           <option value="Подушечки">Подушечки</option>
+          <option value={BUNDLE_CATEGORY}>Наборы (комбо)</option>
         </select>
       </div>
+      {isBundleForm && (
+        <BundleFields products={products} value={bundle} onChange={setBundle} price={price} onPriceChange={setPrice} />
+      )}
       <div>
-        <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Формат</label>
-        <input type="text" placeholder="Напр. «20 мл» или «60 капсул»" value={spec}
+        <label className="mb-1 block text-xs uppercase tracking-wide text-stone">{isBundleForm ? 'Срок курса' : 'Формат'}</label>
+        <input type="text" placeholder={isBundleForm ? 'Напр. «30 дней» или «3 месяца»' : 'Напр. «20 мл» или «60 капсул»'} value={spec}
           onChange={(e) => setSpec(e.target.value)}
           className="w-full rounded border border-stone/30 bg-paper px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
       </div>

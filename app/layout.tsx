@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Unbounded, Manrope, Golos_Text } from 'next/font/google'
 import { CartProvider } from '@/lib/cart-context'
 import Header from '@/components/Header'
@@ -31,6 +31,11 @@ const golos = Golos_Text({
 export const metadata: Metadata = {
   title: 'Lumo',
   description: 'Lumo — премиальные растительные экстракты',
+}
+
+// Панель браузера на телефоне — в цвет фона сайта, а не белая
+export const viewport: Viewport = {
+  themeColor: '#0e0c11',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart-context'
+import { formatPrice } from '@/lib/format'
 import { submitOrder } from './actions'
 
 export default function CheckoutPage() {
@@ -28,6 +29,7 @@ export default function CheckoutPage() {
       items: items.map((item) => ({
         id: item.productId ?? item.id,
         name: item.name,
+        details: item.details,
         price: item.price,
         quantity: item.quantity,
       })),
@@ -82,21 +84,24 @@ export default function CheckoutPage() {
       <div className="card-glow mt-8 rounded-lg bg-mist p-6">
         <div className="flex flex-col gap-3">
           {items.map((item) => (
-            <div key={item.id} className="flex items-center gap-3 text-sm">
+            <div key={item.id} className="flex items-start gap-3 text-sm">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-paper">
                 {item.image_url && (
                   <Image src={item.image_url} alt={item.name} fill sizes="48px" className="object-cover" />
                 )}
               </div>
-              <span className="flex-1 text-stone">{item.name} × {item.quantity}</span>
-              <span className="text-ink">{item.price * item.quantity} ₸</span>
+              <span className="min-w-0 flex-1 text-stone">
+                {item.name} × {item.quantity}
+                {item.details && <span className="mt-0.5 block text-xs text-stone/70">{item.details}</span>}
+              </span>
+              <span className="shrink-0 whitespace-nowrap text-ink">{formatPrice(item.price * item.quantity)}</span>
             </div>
           ))}
         </div>
 
         <div className="mt-4 flex items-center justify-between border-t border-paper/60 pt-4 text-lg">
           <span className="font-display text-ink">Итого</span>
-          <span className="font-price font-bold text-brass">{totalPrice} ₸</span>
+          <span className="font-price font-bold text-brass">{formatPrice(totalPrice)}</span>
         </div>
       </div>
 

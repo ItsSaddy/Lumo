@@ -10,6 +10,8 @@ type CartItem = {
   name: string
   price: number
   image_url: string | null
+  // Состав набора одной строкой — показывается в корзине и уходит менеджеру в заявке
+  details?: string
   quantity: number
 }
 

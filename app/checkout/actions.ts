@@ -3,12 +3,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { randomUUID } from 'crypto'
 import { calculateOrderTotals } from '@/lib/discount'
+import { formatPrice } from '@/lib/format'
 
 type OrderInput = {
   customerName: string
   phone: string
   address: string
-  items: { id: string; name: string; price: number; quantity: number }[]
+  // details — состав набора, чтобы менеджер видел, что собирать
+  items: { id: string; name: string; details?: string; price: number; quantity: number }[]
 }
 
 async function notifyTelegram(order: OrderInput, totalPrice: number) {
@@ -17,7 +19,7 @@ async function notifyTelegram(order: OrderInput, totalPrice: number) {
   if (!token || !chatId) return
 
   const itemsList = order.items
-    .map((item) => `— ${item.name} × ${item.quantity} — ${item.price * item.quantity} ₸`)
+    .map((item) => `— ${item.name} × ${item.quantity} — ${formatPrice(item.price * item.quantity)}${item.details ? `\n   ${item.details}` : ''}`)
     .join('\n')
 
   const text = `🔔 Новая заявка на Lumo
@@ -28,7 +30,7 @@ async function notifyTelegram(order: OrderInput, totalPrice: number) {
 
 ${itemsList}
 
-Итого (со скидкой): ${totalPrice} ₸`
+Итого (со скидкой): ${formatPrice(totalPrice)}`
 
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

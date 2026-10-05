@@ -6,7 +6,7 @@ import { useCart } from '@/lib/cart-context'
 export default function AddToCartButton({
   product,
 }: {
-  product: { id: string; productId?: string; name: string; price: number; image_url: string | null }
+  product: { id: string; productId?: string; name: string; price: number; image_url: string | null; details?: string }
 }) {
   const { addItem } = useCart()
   const [added, setAdded] = useState(false)

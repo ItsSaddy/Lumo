@@ -3,8 +3,14 @@
 import Image from 'next/image'
 import { useRef, useState } from 'react'
 
-// sizes — ширина слота на разных экранах, чтобы браузер качал фото нужного размера
-export default function ProductGallery({ images, alt, sizes }: { images: string[]; alt: string; sizes: string }) {
+// sizes — ширина слота на разных экранах, чтобы браузер качал фото нужного размера;
+// imageClassName — доп. классы фото, напр. сдвиг кадра object-[center_56%]
+export default function ProductGallery({ images, alt, sizes, imageClassName = '' }: {
+  images: string[]
+  alt: string
+  sizes: string
+  imageClassName?: string
+}) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState(0)
 
@@ -15,7 +21,7 @@ export default function ProductGallery({ images, alt, sizes }: { images: string[
   if (images.length === 1) {
     return (
       <Image src={images[0]} alt={alt} fill sizes={sizes}
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+        className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${imageClassName}`} />
     )
   }
 
@@ -38,7 +44,7 @@ export default function ProductGallery({ images, alt, sizes }: { images: string[
         className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {images.map((src, i) => (
           <div key={src} className="relative h-full w-full shrink-0 snap-center">
-            <Image src={src} alt={`${alt} — фото ${i + 1}`} fill sizes={sizes} className="object-cover" />
+            <Image src={src} alt={`${alt} — фото ${i + 1}`} fill sizes={sizes} className={`object-cover ${imageClassName}`} />
           </div>
         ))}
       </div>

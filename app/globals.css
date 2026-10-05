@@ -12,6 +12,11 @@
   --color-mist: #1c1820;
 }
 
+/* Шапка липкая — якоря (#sets, #catalog) не должны прятаться под ней */
+html {
+  scroll-padding-top: 5.5rem;
+}
+
 body {
   background-color: var(--color-paper);
   color: var(--color-ink);

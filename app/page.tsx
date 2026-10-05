@@ -1,7 +1,11 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { createPublicClient } from '@/lib/supabase/public'
 import type { Product } from '@/lib/types'
+import { isBundle, resolveBundle } from '@/lib/bundles'
 import CatalogGrid from '@/components/CatalogGrid'
+import BundleCard from '@/components/BundleCard'
+import StateTimeline from '@/components/StateTimeline'
 import RevealSection from '@/components/RevealSection'
 import FaqAccordion from '@/components/FaqAccordion'
 import SmoothScrollLink from '@/components/SmoothScrollLink'
@@ -138,10 +142,10 @@ export const revalidate = 3600
 
 export default async function Home() {
   const supabase = createPublicClient()
-  const { data: products, error } = await supabase
+  // Берём и скрытые товары: они могут входить в состав видимого набора
+  const { data, error } = await supabase
     .from('products')
     .select('*')
-    .eq('is_available', true)
     .order('sort_order', { ascending: true })
 
   const { data: siteSettings } = await supabase
@@ -150,14 +154,26 @@ export default async function Home() {
     .eq('id', 1)
     .maybeSingle()
 
+  const products = (data ?? []) as Product[]
+  const productsById = new Map(products.map((p) => [p.id, p]))
+  const available = products.filter((p) => p.is_available)
+  const singles = available.filter((p) => !isBundle(p))
+  // Главный экран — готовые наборы; отдельные товары живут в /shop.
+  // Пока наборов нет (не выполнен supabase/bundles.sql) — показываем каталог, как раньше
+  const bundles = available
+    .filter(isBundle)
+    .map((bundle) => ({ bundle, resolved: resolveBundle(bundle, productsById) }))
+    .filter(({ resolved }) => resolved.lines.length > 0)
+  const hasBundles = bundles.length > 0
+
   const heroMediaUrl = siteSettings?.hero_media_url
-    ?? products?.find((p) => p.is_hero && p.image_url)?.image_url
-    ?? products?.find((p) => p.image_url)?.image_url
+    ?? singles.find((p) => p.is_hero && p.image_url)?.image_url
+    ?? singles.find((p) => p.image_url)?.image_url
   const heroMediaType = siteSettings?.hero_media_url ? siteSettings.hero_media_type : 'image'
 
   return (
     <>
-      <section className="relative isolate flex h-96 items-end overflow-hidden sm:h-112 lg:h-128">
+      <section className="relative isolate flex min-h-84 items-end overflow-hidden sm:min-h-112 lg:min-h-128">
         {heroMediaUrl ? (
           <>
             {heroMediaType === 'video' ? (
@@ -173,17 +189,18 @@ export default async function Home() {
         ) : (
           <div className="hero-glow absolute inset-0" />
         )}
-        <div className="animate-fade-up relative z-10 mx-auto w-full max-w-2xl px-5 pb-10 text-center sm:pb-14">
-          <span className="metal-text inline-block font-display text-lg font-bold tracking-[0.3em]">LUMO</span>
-          <h1 className="mt-6 font-display text-4xl font-bold leading-tight text-ink drop-shadow-lg sm:text-5xl md:text-6xl">
+        <div className="animate-fade-up relative z-10 mx-auto w-full max-w-2xl px-5 pb-8 pt-12 text-center sm:pb-14 sm:pt-16">
+          {/* На телефоне логотип уже в шапке прямо над этим блоком */}
+          <span className="metal-text hidden font-display text-lg font-bold tracking-[0.3em] sm:inline-block">LUMO</span>
+          <h1 className="font-display text-4xl font-bold leading-tight text-ink drop-shadow-lg sm:mt-6 sm:text-5xl md:text-6xl">
             Ясность мысли.<br />Сила тела.
           </h1>
           <p className="mx-auto mt-4 max-w-sm text-ink/90 drop-shadow-md">
             Премиальные экстракты редких грибов и трав — ежовик гребенчатый, кордицепс и формулы для фокуса, по стандарту США
           </p>
-          <SmoothScrollLink href="#catalog"
-            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-brass px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-paper shadow-lg shadow-brass/20 transition-all duration-300 hover:scale-105 hover:shadow-brass/40">
-            Смотреть каталог
+          <SmoothScrollLink href={hasBundles ? '#sets' : '#catalog'}
+            className="group mt-6 inline-flex items-center gap-2 rounded-full bg-brass px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-paper shadow-lg shadow-brass/20 transition-all duration-300 hover:scale-105 hover:shadow-brass/40 sm:mt-8">
+            {hasBundles ? 'Выбрать курс' : 'Смотреть каталог'}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 animate-bounce">
               <path d="M12 5v14M5 12l7 7 7-7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -192,11 +209,11 @@ export default async function Home() {
       </section>
 
       <section className="border-b border-mist/60 bg-mist/30">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-5 py-6 sm:grid-cols-4 sm:gap-6 sm:px-8 md:px-10">
+        <div className="mx-auto grid max-w-6xl grid-cols-4 gap-2 px-3 py-4 sm:gap-6 sm:px-8 sm:py-6 md:px-10">
           {TRUST_ITEMS.map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 sm:flex-col sm:items-center sm:gap-2 sm:text-center">
+            <div key={item.label} className="flex flex-col items-center gap-1.5 text-center sm:gap-2">
               {'flag' in item ? (
-                <svg viewBox="0 0 38 20" className="h-4 w-7 shrink-0 rounded-[2px] sm:my-1" aria-hidden>
+                <svg viewBox="0 0 38 20" className="my-0.5 h-4 w-7 shrink-0 rounded-[2px] sm:my-1" aria-hidden>
                   <rect width="38" height="20" fill="#b22234" />
                   {[1, 3, 5, 7, 9, 11].map((row) => (
                     <rect key={row} y={(row * 20) / 13} width="38" height={20 / 13} fill="#fff" />
@@ -207,11 +224,11 @@ export default async function Home() {
                   )))}
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 shrink-0 text-brass">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 shrink-0 text-brass sm:h-6 sm:w-6">
                   <path d={item.icon} />
                 </svg>
               )}
-              <span className="text-xs leading-tight text-stone sm:text-sm">{item.label}</span>
+              <span className="text-[10px] leading-tight text-stone sm:text-sm">{item.label}</span>
             </div>
           ))}
         </div>
@@ -219,7 +236,46 @@ export default async function Home() {
 
       <main className="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 sm:pt-14 md:px-10">
         {error && <p className="text-red-400">Не получилось загрузить товары: {error.message}</p>}
-        {!error && <CatalogGrid products={(products as Product[]) ?? []} />}
+        {!error && !hasBundles && <CatalogGrid products={singles} />}
+
+        {hasBundles && (
+          <section id="sets">
+            <p className="text-sm uppercase tracking-widest text-stone">Готовые решения</p>
+            <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Выберите курс</h2>
+            <p className="mt-3 max-w-xl leading-relaxed text-stone">
+              LUMO работает накопительно — лучший результат даёт курс. Наборы выгоднее, чем покупать по отдельности.
+            </p>
+            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+              {bundles.map(({ bundle, resolved }) => (
+                <BundleCard key={bundle.id} bundle={bundle} resolved={resolved} />
+              ))}
+            </div>
+
+            <Link href="/shop"
+              className="group mt-6 flex items-center gap-4 rounded-lg border border-mist bg-paper px-5 py-5 transition-colors hover:border-brass/50 sm:px-6">
+              <div className="hidden shrink-0 -space-x-3 sm:flex">
+                {singles.filter((p) => p.image_url).slice(0, 4).map((p) => (
+                  <span key={p.id} className="relative h-11 w-11 overflow-hidden rounded-full bg-mist ring-2 ring-paper">
+                    <Image src={p.image_url!} alt="" fill sizes="44px" className="object-cover" />
+                  </span>
+                ))}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-base text-ink sm:text-lg">Нужен один продукт?</p>
+                <p className="mt-1 text-sm text-stone">Экстракты, капсулы и паучи по отдельности — в магазине</p>
+              </div>
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mist text-brass transition-transform duration-300 group-hover:translate-x-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4" aria-hidden>
+                  <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </Link>
+          </section>
+        )}
+
+        <RevealSection className="mt-24">
+          <StateTimeline ctaHref={hasBundles ? '#sets' : undefined} />
+        </RevealSection>
 
         <RevealSection className="mt-24">
           <p className="text-sm uppercase tracking-widest text-stone">Преимущества</p>

@@ -21,12 +21,15 @@ export default function SmoothScrollLink({
     e.preventDefault()
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // отступ под шапку задаёт scroll-padding-top в globals.css
       target.scrollIntoView()
       return
     }
 
+    // Шапка липкая — останавливаемся под ней, а не под краем окна
+    const headerHeight = document.querySelector('header')?.offsetHeight ?? 0
     const start = window.scrollY
-    const end = target.getBoundingClientRect().top + start - 24
+    const end = target.getBoundingClientRect().top + start - headerHeight - 16
     const distance = end - start
     const duration = 900
     let startTime: number | null = null
