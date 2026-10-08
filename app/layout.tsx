@@ -4,7 +4,6 @@ import { CartProvider } from '@/lib/cart-context'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import './globals.css'
-import WhatsAppButton from '@/components/WhatsAppButton'
 
 const unbounded = Unbounded({
   subsets: ['latin', 'cyrillic'],
@@ -46,7 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <div className="flex-1">{children}</div>
           <Footer />
-          <WhatsAppButton />
         </CartProvider>
       </body>
     </html>

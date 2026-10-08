@@ -1,11 +1,15 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/cart-context'
 import { formatPrice } from '@/lib/format'
-import { submitOrder } from './actions'
+import { KASPI_PAY_LINK } from '@/lib/contacts'
+import type { KaspiQr } from '@/lib/kaspi'
+import KaspiPayment from '@/components/KaspiPayment'
+import { createOrderQr, submitOrder } from './actions'
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
@@ -15,6 +19,8 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [qr, setQr] = useState<{ orderId: string; qr: KaspiQr } | null>(null)
+  const [orderTotal, setOrderTotal] = useState(0)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,16 +41,25 @@ export default function CheckoutPage() {
       })),
     })
 
-    if (result.error) {
-      setError(result.error)
+    if (result.error || !result.orderId) {
+      setError(result.error ?? 'Не получилось оформить заказ')
       setLoading(false)
       return
     }
 
+    // Заказ уже в базе. Если оплата по QR настроена — сразу показываем QR; если нет или Kaspi
+    // не ответил — обычное «Заявка отправлена», менеджер свяжется сам
+    const payment = await createOrderQr(result.orderId)
+    if (payment && 'qr' in payment) setQr({ orderId: result.orderId, qr: payment.qr })
+
+    // Сумму запоминаем до очистки корзины — её покажем на экране оплаты по ссылке Kaspi
+    setOrderTotal(totalPrice)
     clearCart()
     setSubmitted(true)
     setLoading(false)
   }
+
+  if (submitted && qr) return <KaspiPayment orderId={qr.orderId} initialQr={qr.qr} />
 
   if (submitted) {
     return (
@@ -54,6 +69,22 @@ export default function CheckoutPage() {
         <p className="mt-4 text-stone">
           Мы свяжемся с тобой по указанному номеру в течение часа, чтобы подтвердить заказ и договориться о доставке.
         </p>
+
+        {/* Оплата по ссылке Kaspi Pay: сумму покупатель вводит сам, поступление менеджер сверяет в приложении Kaspi Pay */}
+        {KASPI_PAY_LINK && orderTotal > 0 && (
+          <div className="card-glow mt-8 rounded-lg bg-mist p-6">
+            <p className="text-sm text-stone">Можно оплатить сразу — к оплате</p>
+            <p className="mt-1 font-price text-2xl font-bold text-brass">{formatPrice(orderTotal)}</p>
+            <a href={KASPI_PAY_LINK} target="_blank" rel="noopener noreferrer"
+              className="mt-5 flex items-center justify-center rounded-full bg-[#f14635] py-3.5 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-transform hover:scale-[1.02]">
+              Оплатить в Kaspi
+            </a>
+            <p className="mt-3 text-xs leading-relaxed text-stone">
+              Введите сумму {formatPrice(orderTotal)} на странице Kaspi. Менеджер проверит оплату и подтвердит заказ.
+            </p>
+          </div>
+        )}
+
         <button onClick={() => router.push('/')}
           className="mt-8 rounded-full bg-brass px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-paper">
           В каталог
@@ -130,6 +161,11 @@ export default function CheckoutPage() {
           {loading ? 'Отправляю...' : 'Оставить заявку'}
         </button>
         <p className="text-center text-xs text-stone">Без предоплаты · Ответим в течение часа · Рассрочка Kaspi</p>
+        <p className="text-center text-xs leading-relaxed text-stone/70">
+          Нажимая «Оставить заявку», вы даёте{' '}
+          <Link href="/consent" className="underline underline-offset-2 hover:text-ink">согласие на обработку персональных данных</Link>{' '}
+          в соответствии с <Link href="/privacy" className="underline underline-offset-2 hover:text-ink">Политикой конфиденциальности</Link>.
+        </p>
       </form>
     </main>
   )

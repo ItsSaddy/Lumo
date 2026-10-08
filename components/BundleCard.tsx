@@ -49,11 +49,6 @@ function GiftIcon() {
   )
 }
 
-// «Полный курс «Ум и Тело»» не должен рваться посреди кавычек
-function keepQuotesTogether(text: string) {
-  return text.replace(/«[^»]+»/g, (quoted) => quoted.replace(/ /g, '\u00a0'))
-}
-
 export default function BundleCard({ bundle, resolved }: { bundle: Product; resolved: ResolvedBundle }) {
   const images = getProductImages(bundle)
   const badge = bundle.bundle?.badge
@@ -81,7 +76,9 @@ export default function BundleCard({ bundle, resolved }: { bundle: Product; reso
       </div>
 
       <div className="flex flex-1 flex-col p-6 sm:p-7">
-        <h3 className="font-display text-2xl leading-tight text-ink">{keepQuotesTogether(bundle.name)}</h3>
+        {/* Название в кавычках («Активная продуктивность») шире карточки на телефоне — не склеиваем его,
+            а balance переносит строки ровно, без одинокого слова на последней */}
+        <h3 className="text-balance font-display text-2xl leading-tight text-ink">{bundle.name}</h3>
         {bundle.description && <p className="mt-2 text-sm leading-relaxed text-stone">{bundle.description}</p>}
 
         <ul className="mt-5 flex flex-col gap-2">
@@ -109,8 +106,9 @@ export default function BundleCard({ bundle, resolved }: { bundle: Product; reso
 
         {/* Спейсер: прижимает цену и кнопку к низу, чтобы карточки в ряду были одной высоты */}
         <div className="mt-auto pt-6">
-          <div className="flex items-center justify-between gap-3">
-            {/* На узкой карточке зачёркнутая цена переносится под основную, а кнопка остаётся справа */}
+          {/* Кнопка — по центру между ценой и плашками. На телефоне плашкам нужна вся ширина, поэтому там кнопка
+              стоит у цены (зачёркнутая цена переносится под основную, и кнопка и так оказывается ниже) */}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
               <p className="font-price text-2xl font-bold text-brass">{formatPrice(bundle.price)}</p>
               {regularTotal > bundle.price && (
@@ -118,22 +116,22 @@ export default function BundleCard({ bundle, resolved }: { bundle: Product; reso
               )}
             </div>
             <SmoothScrollLink href="#benefits"
-              className="flex shrink-0 items-center gap-1.5 rounded-full border border-brass/40 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest text-brass transition-colors hover:border-brass hover:bg-brass/10 sm:px-4">
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-brass/40 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest text-brass transition-colors hover:border-brass hover:bg-brass/10 sm:row-span-2 sm:px-4">
               Подробнее
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5" aria-hidden>
                 <path d="M12 5v14M5 12l7 7 7-7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </SmoothScrollLink>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {savings > 0 && (
-              <span className="rounded bg-brass/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-brass">
-                Выгода {formatPrice(savings)}
+            <div className="col-span-2 mt-2 flex flex-wrap items-center gap-2 sm:col-span-1">
+              {savings > 0 && (
+                <span className="rounded bg-brass/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-brass">
+                  Выгода {formatPrice(savings)}
+                </span>
+              )}
+              <span className="rounded bg-[#e31e24] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                Kaspi Рассрочка
               </span>
-            )}
-            <span className="rounded bg-[#e31e24] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-              Kaspi Рассрочка
-            </span>
+            </div>
           </div>
           <AddToCartButton product={{
             id: bundle.id,

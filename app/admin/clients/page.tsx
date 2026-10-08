@@ -18,19 +18,25 @@ type OrderRow = {
   address: string
   total_price: number
   created_at: string
+  // Колонки оплаты (supabase/payments.sql) — до выполнения скрипта их нет в строке
+  payment_status?: string
+  payment_method?: string | null
+  paid_at?: string | null
   order_items: OrderItemRow[]
 }
+
+const PAYMENT_METHOD: Record<string, string> = { GOLD: 'Kaspi Gold', RED: 'Kaspi Red', LOAN: 'Kaspi Кредит' }
 
 export default async function ClientsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/admin/login')
 
-  // products(*), а не перечень колонок: так запрос не падает, пока колонки bundle ещё нет в базе
+  // «*», а не перечень колонок: так запрос не падает, пока колонок bundle и оплаты ещё нет в базе
   const { data: orders } = await supabase
     .from('orders')
     .select(`
-      id, customer_name, phone, country, address, total_price, created_at,
+      *,
       order_items ( quantity, price_at_order, products ( * ) )
     `)
     .order('created_at', { ascending: false })
@@ -63,6 +69,11 @@ export default async function ClientsPage() {
               <div className="text-right">
                 <p className="whitespace-nowrap font-price text-lg font-bold text-brass">{formatPrice(order.total_price)}</p>
                 <p className="text-xs text-stone">{new Date(order.created_at).toLocaleString('ru-RU')}</p>
+                {order.payment_status === 'paid' && (
+                  <p className="mt-1.5 inline-block rounded bg-brass/15 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-brass">
+                    Оплачен · {PAYMENT_METHOD[order.payment_method ?? ''] ?? 'Kaspi'}
+                  </p>
+                )}
               </div>
             </div>
             <div className="mt-4 border-t border-mist pt-4">

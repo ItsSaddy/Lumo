@@ -8,8 +8,9 @@ import BundleCard from '@/components/BundleCard'
 import StateTimeline from '@/components/StateTimeline'
 import RevealSection from '@/components/RevealSection'
 import FaqAccordion from '@/components/FaqAccordion'
+import ConsultationSection from '@/components/ConsultationSection'
 import SmoothScrollLink from '@/components/SmoothScrollLink'
-import { CordycepsExtractInstruction, LionsManeCapsulesInstruction, LionsManeExtractInstruction } from '@/components/UsageInstructions'
+import { AntiNicotineInstruction, CordycepsExtractInstruction, LionsManeCapsulesInstruction, LionsManeExtractInstruction } from '@/components/UsageInstructions'
 import BenefitAccordion, { type Benefit } from '@/components/BenefitAccordion'
 
 const TRUST_ITEMS = [
@@ -116,6 +117,7 @@ const NTIN_CODES = [
 ]
 
 const FAQ = [
+  { q: 'Как применять набор Anti-Nicotine?', a: <AntiNicotineInstruction /> },
   { q: 'Как принимать капсулы ежовика?', a: <LionsManeCapsulesInstruction /> },
   { q: 'Как принимать жидкий экстракт ежовика?', a: <LionsManeExtractInstruction /> },
   { q: 'Как принимать жидкий экстракт кордицепса?', a: <CordycepsExtractInstruction /> },
@@ -292,7 +294,7 @@ export default async function Home() {
           </div>
         </RevealSection>
 
-        <RevealSection className="mt-24">
+        <RevealSection id="reviews" className="mt-24">
           <p className="text-sm uppercase tracking-widest text-stone">Отзывы</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Что говорят клиенты</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -306,7 +308,7 @@ export default async function Home() {
           </div>
         </RevealSection>
 
-        <RevealSection className="mt-24 rounded-lg bg-mist p-8 sm:p-12">
+        <RevealSection id="about" className="mt-24 rounded-lg bg-mist p-8 sm:p-12">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:items-center">
             <div>
               <p className="text-sm uppercase tracking-widest text-stone">О бренде</p>
@@ -342,10 +344,14 @@ export default async function Home() {
           </div>
         </RevealSection>
 
-        <RevealSection className="mt-24 max-w-3xl">
+        <RevealSection id="faq" className="mt-24 max-w-3xl">
           <p className="text-sm uppercase tracking-widest text-stone">Вопросы</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Частые вопросы</h2>
           <FaqAccordion items={FAQ} />
+        </RevealSection>
+
+        <RevealSection id="consultation" className="mt-24">
+          <ConsultationSection />
         </RevealSection>
       </main>
     </>

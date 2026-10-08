@@ -35,7 +35,13 @@ Core tables (inferred from queries, no migrations in this repo): `products`, `or
 
 **Variants**: hardcoded in [lib/product-info.ts](lib/product-info.ts) by category — capsule sizes (60/120, own prices) and pouch flavors (own photos from `public/flavors/`, `comingSoon` ones show «Скоро в наличии» instead of the cart button). Cart line id is `${productId}:${variantKey}`; the variant is not stored in `order_items` (only in the line name / Telegram text).
 
-**Checkout flow**: [app/checkout/actions.ts](app/checkout/actions.ts) (`submitOrder`, a Server Action) writes an `orders` row + `order_items` rows, then best-effort notifies a Telegram chat via bot API (`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` — silently skipped if unset). There is no payment integration; checkout only collects contact/shipping info and creates a pending order for manual follow-up.
+**Checkout flow**: [app/checkout/actions.ts](app/checkout/actions.ts) (`submitOrder`, a Server Action) writes an `orders` row + `order_items` rows, then best-effort notifies a Telegram chat via bot API (`sendTelegram` in [lib/telegram.ts](lib/telegram.ts); `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` — silently skipped if unset). `submitOrder` re-checks every cart price against `products` (+ variant prices from `getProductVariants`) — cart prices come from `localStorage` and the order total is what gets charged.
+
+**Kaspi QR payment** (optional, via the ApiPay.kz intermediary — no direct Kaspi API): after `submitOrder`, `createOrderQr` issues a QR invoice for the order's DB total ([lib/kaspi.ts](lib/kaspi.ts)); [components/KaspiPayment.tsx](components/KaspiPayment.tsx) shows the QR (valid only minutes — `qr_expires_at`), a deep link for phones, and polls `getOrderPaymentStatus`. The order is marked paid **only** by the signed webhook [app/api/kaspi/webhook/route.ts](app/api/kaspi/webhook/route.ts) (matched via `external_order_id` = order id; a second paid QR for the same order triggers a refund warning in Telegram). DB access there uses the secret-key client [lib/supabase/admin.ts](lib/supabase/admin.ts). Columns come from [supabase/payments.sql](supabase/payments.sql). If `APIPAY_*`/`SUPABASE_SECRET_KEY` are unset, checkout falls back to «Заявка отправлена» (manual follow-up).
+
+**Consultation requests**: [components/ConsultationSection.tsx](components/ConsultationSection.tsx) (home `#consultation` and `/shop`) posts to [app/consultation/actions.ts](app/consultation/actions.ts). Unlike orders, these are **not stored in the DB** — Telegram is the only sink, so the action returns an error (asking to use WhatsApp) when the message can't be sent. A hidden `website` honeypot field drops bot submissions.
+
+**Contacts & documents**: phone/WhatsApp, optional email/Instagram (render only when non-empty) and company details live in [lib/contacts.ts](lib/contacts.ts), used by the footer and the legal pages `/privacy`, `/consent`, `/terms` (shared [components/LegalPage.tsx](components/LegalPage.tsx), common strings in [lib/legal.ts](lib/legal.ts) — bump `LEGAL_UPDATED` when texts change).
 
 **Admin**: [app/admin/actions.ts](app/admin/actions.ts) has the product CRUD Server Actions (`addProduct`/`updateProduct`/`deleteProduct`/`moveProduct`), each re-checking auth and revalidating `/admin`, `/` and `/shop` after writes. Bundles and regular products are listed (and reordered) as separate groups. [app/admin/clients](app/admin/clients/page.tsx) lists submitted orders with their line items (bundle composition expanded) via a nested Supabase select.
 
@@ -44,3 +50,5 @@ Core tables (inferred from queries, no migrations in this repo): `products`, `or
 ## Environment variables
 
 Required in `.env.local` (not committed): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+
+Optional, enable Kaspi QR payment: `APIPAY_API_KEY`, `APIPAY_WEBHOOK_SECRET` (ApiPay cabinet; webhook URL `https://www.health-lumo.org/api/kaspi/webhook`), `SUPABASE_SECRET_KEY` (server-only, bypasses RLS).

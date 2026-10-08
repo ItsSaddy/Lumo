@@ -4,6 +4,7 @@ import { createPublicClient } from '@/lib/supabase/public'
 import type { Product } from '@/lib/types'
 import { isBundle, resolveBundle } from '@/lib/bundles'
 import CatalogGrid from '@/components/CatalogGrid'
+import ConsultationSection from '@/components/ConsultationSection'
 
 export const metadata: Metadata = {
   title: 'Магазин — Lumo',
@@ -53,6 +54,10 @@ export default async function ShopPage() {
           ? <p className="text-red-400">Не получилось загрузить товары: {error.message}</p>
           : <CatalogGrid products={singles} />}
       </div>
+
+      <section className="mt-24">
+        <ConsultationSection />
+      </section>
     </main>
   )
 }
