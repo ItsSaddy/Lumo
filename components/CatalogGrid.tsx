@@ -1,28 +1,35 @@
 'use client'
 
-import { useRef, useState, useTransition, ViewTransition } from 'react'
+import { useState, useTransition, ViewTransition } from 'react'
+import Image from 'next/image'
 import type { Product } from '@/lib/types'
 import AddToCartButton from '@/components/AddToCartButton'
 import ProductGallery from '@/components/ProductGallery'
-import { getProductBenefits, getProductImages, getProductVariants } from '@/lib/product-info'
+import ProductDialog from '@/components/ProductDialog'
+import ProductTile from '@/components/ProductTile'
+import { displayName, getProductBenefits, getProductImages, getProductVariants } from '@/lib/product-info'
 import { formatPrice } from '@/lib/format'
 import { whatsappLink } from '@/lib/contacts'
 
 const CATEGORIES = ['Все', 'Экстракты', 'Капсулы', 'Подушечки']
 const POUCH_CATEGORY = 'Подушечки'
 
-const CATEGORY_INFO: Record<string, { benefits: string[]; badges: string[] }> = {
+// caption — короткая подпись под названием на карточке; остальное показывается в окне «Подробнее»
+const CATEGORY_INFO: Record<string, { benefits: string[]; badges: string[]; caption: string }> = {
   'Экстракты': {
     benefits: ['Улучшает сон', 'Укрепляет память и фокус', 'Снимает стресс и тревожность'],
     badges: ['100% натурально', 'Стандарт США'],
+    caption: 'Жидкий экстракт · 20 мл',
   },
   'Капсулы': {
     benefits: ['Укрепляет нервную систему', 'Ускоряет усвоение информации', 'Для ежедневного приёма'],
     badges: ['100% органика', 'Стандарт США'],
+    caption: '60 или 120 капсул',
   },
   [POUCH_CATEGORY]: {
     benefits: ['Фокус без сонливости', 'Заряд энергии за 5 минут', 'Помогает бросить курить'],
     badges: ['0% никотина', 'Халяль'],
+    caption: 'Без никотина · 20 шт',
   },
 }
 
@@ -94,7 +101,7 @@ export default function CatalogGrid({ products }: { products: Product[] }) {
             <p className="mt-8 text-stone">В этой категории пока нет товаров.</p>
           )}
 
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -117,15 +124,12 @@ function ProductCard({ product }: { product: Product }) {
   // У вкусов паучей свои фото — при выборе вкуса меняется и картинка
   const images = variant?.image ? [variant.image] : getProductImages(product)
   const comingSoon = variant?.comingSoon ?? false
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const closeRef = useRef<HTMLButtonElement>(null)
-
-  // showModal() фокусирует первую кнопку окна (выбор варианта или «В корзину») и прокручивает
-  // шторку к ней — на телефоне окно открывалось уже внизу. Фокус на «Закрыть» держит его вверху
-  function openDialog() {
-    dialogRef.current?.showModal()
-    closeRef.current?.focus()
-  }
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  // На карточке у товара с фасовками — минимальная цена «от …»
+  const variantPrices = variants?.options.map((v) => v.price ?? product.price) ?? [product.price]
+  const minPrice = Math.min(...variantPrices)
+  const cardPrice = minPrice < Math.max(...variantPrices) ? `от ${formatPrice(minPrice)}` : formatPrice(minPrice)
+  const cover = getProductImages(product)[0]
 
   const badges = (
     <div className="flex flex-wrap gap-1.5">
@@ -221,58 +225,28 @@ function ProductCard({ product }: { product: Product }) {
   )
 
   return (
-    <article className="card-glow group flex flex-col overflow-hidden rounded-lg bg-mist transition-transform duration-300 hover:-translate-y-1">
-      <div className="relative aspect-4/5 w-full overflow-hidden bg-paper">
-        <ProductGallery key={images.join()} images={images} alt={product.name} sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw" />
-        {comingSoonBadge}
-      </div>
-      <div className="flex flex-1 flex-col p-6">
-        {badges}
-        <h2 className="mt-3 font-display text-2xl text-ink">{product.name}</h2>
-        {product.description && (
-          <>
-            <p className="mt-2 text-sm leading-relaxed text-stone line-clamp-2">{product.description}</p>
-            <button type="button" onClick={openDialog}
-              className="mt-1.5 inline-flex items-center gap-1 self-start text-xs font-semibold uppercase tracking-widest text-brass transition-colors hover:text-ink">
-              Подробнее
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3.5 w-3.5">
-                <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </>
-        )}
-        {benefitList && <div className="mt-4">{benefitList}</div>}
-        {/* Спейсер: прижимает цену и кнопку к низу, чтобы карточки в ряду были одной высоты */}
-        <div className="mt-auto pt-6">{purchase}</div>
-      </div>
-
-      {product.description && (
-        <dialog ref={dialogRef} aria-label={product.name}
-          onClick={(e) => { if (e.target === e.currentTarget) e.currentTarget.close() }}
-          className="product-dialog m-0 mt-auto max-h-[92dvh] w-full max-w-none overflow-y-auto rounded-t-2xl bg-mist p-0 text-ink backdrop:bg-black/70 backdrop:backdrop-blur-sm sm:m-auto sm:max-w-3xl sm:rounded-2xl">
-          <div className="relative sm:grid sm:grid-cols-2">
-            <div className="group relative aspect-4/5 w-full overflow-hidden bg-paper sm:aspect-auto sm:min-h-112">
-              <div className="h-full w-full sm:absolute sm:inset-0">
-                <ProductGallery key={images.join()} images={images} alt={product.name} sizes="(min-width: 640px) 384px, 100vw" />
-              </div>
-              {comingSoonBadge}
-            </div>
-            <div className="flex flex-col p-6 sm:p-8">
-              {badges}
-              <h2 className="mt-3 pr-8 font-display text-3xl text-ink">{product.name}</h2>
-              <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-stone">{product.description}</p>
-              {benefitList && <div className="mt-5 border-t border-paper/60 pt-5">{benefitList}</div>}
-              <div className="mt-auto pt-6">{purchase}</div>
-            </div>
-            <button ref={closeRef} type="button" onClick={() => dialogRef.current?.close()} aria-label="Закрыть"
-              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-paper/80 text-ink backdrop-blur transition-colors hover:text-brass">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
-                <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-        </dialog>
-      )}
-    </article>
+    <ProductTile
+      onOpen={() => setDetailsOpen(true)}
+      media={cover
+        ? <Image src={cover} alt={product.name} fill sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+        : <div className="flex h-full items-center justify-center text-sm text-stone">нет фото</div>}
+      title={displayName(product.name)}
+      caption={info?.caption ?? product.spec}
+      price={cardPrice}
+      dialog={
+        <ProductDialog open={detailsOpen} onClose={() => setDetailsOpen(false)} label={product.name}
+          media={<ProductGallery key={images.join()} images={images} alt={product.name} sizes="(min-width: 640px) 384px, 100vw" />}
+          overlay={comingSoonBadge}>
+          {badges}
+          <h2 className="mt-3 pr-8 font-display text-3xl text-ink">{product.name}</h2>
+          {product.description && (
+            <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-stone">{product.description}</p>
+          )}
+          {benefitList && <div className="mt-5 border-t border-paper/60 pt-5">{benefitList}</div>}
+          <div className="mt-auto pt-6">{purchase}</div>
+        </ProductDialog>
+      }
+    />
   )
 }

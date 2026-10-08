@@ -6,16 +6,20 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
+// onClick — вызывается до прокрутки (например, закрыть окно «Подробнее», чтобы оно не осталось поверх блока)
 export default function SmoothScrollLink({
   href,
   children,
   className,
+  onClick,
 }: {
   href: string
   children: ReactNode
   className?: string
+  onClick?: () => void
 }) {
   function handleClick(e: MouseEvent<HTMLAnchorElement>) {
+    onClick?.()
     const target = document.getElementById(href.replace('#', ''))
     if (!target) return
     e.preventDefault()

@@ -30,8 +30,8 @@ export default function Footer() {
   return (
     <footer className="border-t border-mist/60 bg-mist/20">
       <div className="mx-auto max-w-6xl px-5 pb-10 pt-14 sm:px-8 sm:pt-20 md:px-10">
-        <p className="metal-text font-display text-6xl font-bold leading-none tracking-[0.12em] sm:text-8xl lg:text-9xl">LUMO</p>
-        <p className="mt-4 font-display text-xl text-ink sm:text-2xl">Ясность мысли. Сила тела.</p>
+        <p className="metal-text font-display text-4xl font-bold leading-none tracking-[0.15em] sm:text-5xl">LUMO</p>
+        <p className="mt-3 font-display text-base text-ink sm:text-lg">Ясность мысли. Сила тела.</p>
 
         <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 text-sm sm:mt-14 lg:grid-cols-[1fr_1fr_2fr]">
           <div>
@@ -48,9 +48,6 @@ export default function Footer() {
                 <li><a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className={LINK}>Instagram @{INSTAGRAM}</a></li>
               )}
             </ul>
-            <p className="mt-5 leading-relaxed text-stone">
-              Доставка по Алматы — 1 500 ₸, по Казахстану — по тарифам перевозчика
-            </p>
           </div>
 
           <div>
