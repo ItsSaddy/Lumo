@@ -174,12 +174,14 @@ export default async function Home() {
       <section className="relative isolate flex min-h-84 items-end overflow-hidden sm:min-h-112 lg:min-h-128">
         {heroMediaUrl ? (
           <>
+            {/* Кадр опущен на 25px, чтобы на широких экранах не срезались крышки баночек; min(0px, …) —
+                чтобы на телефоне, где картинка и так видна по высоте целиком, сверху не появлялась пустая полоса */}
             {heroMediaType === 'video' ? (
-              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-120"
+              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_min(0px,calc(68%_+_25px))] brightness-120"
                 autoPlay muted loop playsInline />
             ) : (
               <Image src={heroMediaUrl} alt="" fill preload sizes="100vw"
-                className="object-cover object-[center_68%] brightness-120" />
+                className="object-cover object-[center_min(0px,calc(68%_+_25px))] brightness-120" />
             )}
             {/* Низ под текстом затемнён — чтобы читался заголовок и картинка перетекала в фон; верх не затемняем, продукция видна целиком */}
             <div className="absolute inset-0 bg-linear-to-t from-paper from-5% via-paper/55 via-50% to-transparent" />
