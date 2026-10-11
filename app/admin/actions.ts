@@ -47,6 +47,7 @@ function cleanBundle(bundle: BundleInfo | null | undefined): BundleInfo {
         gift: Boolean(item.gift),
       })),
     badge: bundle?.badge?.trim() || null,
+    compare_at: Math.round(Number(bundle?.compare_at)) > 0 ? Math.round(Number(bundle?.compare_at)) : null,
   }
 }
 

@@ -7,7 +7,7 @@ import type { Product } from '@/lib/types'
 import { getProductImages } from '@/lib/product-info'
 import { BUNDLE_CATEGORY } from '@/lib/bundles'
 import ProductImagesField, { photosFromUrls, uploadPhotos, type PhotoItem } from './ProductImagesField'
-import BundleFields, { bundleDraftFrom, type BundleDraft } from './BundleFields'
+import BundleFields, { bundleDraftFrom, bundleFromDraft, type BundleDraft } from './BundleFields'
 
 // products — обычные товары, из которых собирается состав набора
 export default function EditProductForm({ product, products }: { product: Product; products: Product[] }) {
@@ -53,7 +53,7 @@ export default function EditProductForm({ product, products }: { product: Produc
       images: urls,
       is_available: isAvailable,
       is_hero: isHero,
-      bundle: isBundleForm ? { items: bundle.items, badge: bundle.badge } : undefined,
+      bundle: isBundleForm ? bundleFromDraft(bundle) : undefined,
     })
 
     if (result?.error) {

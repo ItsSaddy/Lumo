@@ -7,7 +7,7 @@ import { COMPANY, EMAIL, INSTAGRAM, INSTAGRAM_URL, PHONE, PHONE_DISPLAY, whatsap
 const NAV = [
   { href: '/#sets', label: 'Наборы' },
   { href: '/shop', label: 'Магазин' },
-  { href: '/#benefits', label: 'Преимущества' },
+  { href: '/#benefits', label: 'О компонентах' },
   { href: '/#reviews', label: 'Отзывы' },
   { href: '/#about', label: 'О бренде' },
   { href: '/#faq', label: 'Вопросы' },

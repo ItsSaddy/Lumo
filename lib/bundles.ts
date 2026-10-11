@@ -34,7 +34,7 @@ export type BundleLine = {
 
 export type ResolvedBundle = {
   lines: BundleLine[]
-  // Сумма платных позиций по отдельности — показывается зачёркнутой
+  // Зачёркнутая цена: заданная в админке (bundle.compare_at) или сумма платных позиций по отдельности
   regularTotal: number
   giftTotal: number
   // Выгода покупателя: скидка плюс стоимость подарков
@@ -62,14 +62,16 @@ export function resolveBundle(bundle: Product, productsById: Map<string, Product
 
   const sum = (gift: boolean) =>
     lines.filter((l) => l.gift === gift).reduce((total, l) => total + l.unitPrice * l.quantity, 0)
-  const regularTotal = sum(false)
   const giftTotal = sum(true)
+  // Если зачёркнутая цена задана вручную, выгода — ровно разница с ней: подарки в неё уже заложены
+  const compareAt = Number(bundle.bundle?.compare_at) || 0
+  const regularTotal = compareAt > 0 ? compareAt : sum(false)
 
   return {
     lines,
     regularTotal,
     giftTotal,
-    savings: Math.max(0, regularTotal + giftTotal - bundle.price),
+    savings: Math.max(0, compareAt > 0 ? compareAt - bundle.price : regularTotal + giftTotal - bundle.price),
     discountPercent: regularTotal > bundle.price ? Math.round((1 - bundle.price / regularTotal) * 100) : 0,
   }
 }

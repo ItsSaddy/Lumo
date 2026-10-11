@@ -10,6 +10,8 @@ export type BundleInfo = {
   items: BundleItem[]
   // Плашка на карточке, напр. «Хит продаж»
   badge?: string | null
+  // Зачёркнутая цена вручную (напр. прежняя цена набора); пусто — сумма товаров по отдельности
+  compare_at?: number | null
 }
 
 export type Product = {

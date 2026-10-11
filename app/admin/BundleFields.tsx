@@ -6,10 +6,20 @@ import { getProductVariants } from '@/lib/product-info'
 import { getUnitPrice } from '@/lib/bundles'
 import { formatPrice } from '@/lib/format'
 
-export type BundleDraft = { items: BundleItem[]; badge: string }
+// compareAt — зачёркнутая цена строкой из поля ввода; пусто — сайт зачёркивает сумму по отдельности
+export type BundleDraft = { items: BundleItem[]; badge: string; compareAt: string }
 
 export function bundleDraftFrom(product?: Product): BundleDraft {
-  return { items: product?.bundle?.items ?? [], badge: product?.bundle?.badge ?? '' }
+  return {
+    items: product?.bundle?.items ?? [],
+    badge: product?.bundle?.badge ?? '',
+    compareAt: product?.bundle?.compare_at ? String(product.bundle.compare_at) : '',
+  }
+}
+
+// Набор для сохранения: то, что уходит в колонку bundle
+export function bundleFromDraft(draft: BundleDraft) {
+  return { items: draft.items, badge: draft.badge, compare_at: parseFloat(draft.compareAt) || null }
 }
 
 const FIELD = 'rounded border border-stone/30 bg-paper px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-brass'
@@ -60,7 +70,10 @@ export default function BundleFields({
     return item.gift ? { ...acc, gifts: acc.gifts + sum } : { ...acc, regular: acc.regular + sum }
   }, { regular: 0, gifts: 0 })
   const priceValue = parseFloat(price) || 0
-  const savings = totals.regular + totals.gifts - priceValue
+  // Считаем так же, как сайт (resolveBundle): при заданной зачёркнутой цене выгода — разница с ней
+  const compareAt = parseFloat(value.compareAt) || 0
+  const crossed = compareAt > 0 ? compareAt : totals.regular
+  const savings = compareAt > 0 ? compareAt - priceValue : totals.regular + totals.gifts - priceValue
 
   return (
     <div className="rounded-lg border border-brass/30 p-4">
@@ -115,7 +128,7 @@ export default function BundleFields({
           {priceValue > 0 && (
             <p className="mt-1">
               Выгода покупателя: <span className={savings > 0 ? 'text-brass' : 'text-red-400'}>{formatPrice(savings)}</span>
-              {totals.regular > priceValue && ` (скидка ${Math.round((1 - priceValue / totals.regular) * 100)}%)`}
+              {crossed > priceValue && ` (скидка ${Math.round((1 - priceValue / crossed) * 100)}%)`}
             </p>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -131,6 +144,13 @@ export default function BundleFields({
           </div>
         </div>
       )}
+
+      <div className="mt-4">
+        <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Зачёркнутая цена</label>
+        <input type="number" min={0} placeholder={totals.regular > 0 ? `Пусто — сумма по отдельности, ${formatPrice(totals.regular)}` : 'Пусто — сумма по отдельности'}
+          value={value.compareAt} onChange={(e) => onChange({ ...value, compareAt: e.target.value })}
+          className={`${FIELD} w-full`} />
+      </div>
 
       <div className="mt-4">
         <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Плашка на карточке</label>

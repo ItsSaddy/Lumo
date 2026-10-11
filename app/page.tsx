@@ -175,14 +175,14 @@ export default async function Home() {
         {heroMediaUrl ? (
           <>
             {heroMediaType === 'video' ? (
-              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-110"
+              <video src={heroMediaUrl} className="absolute inset-0 h-full w-full object-cover object-[center_68%] brightness-120"
                 autoPlay muted loop playsInline />
             ) : (
               <Image src={heroMediaUrl} alt="" fill preload sizes="100vw"
-                className="object-cover object-[center_68%] brightness-110" />
+                className="object-cover object-[center_68%] brightness-120" />
             )}
-            {/* Низ под текстом затемнён плотно, верх — слегка, чтобы продукция оставалась видна */}
-            <div className="absolute inset-0 bg-linear-to-t from-paper from-10% via-paper/75 via-55% to-paper/25" />
+            {/* Низ под текстом затемнён — чтобы читался заголовок и картинка перетекала в фон; верх не затемняем, продукция видна целиком */}
+            <div className="absolute inset-0 bg-linear-to-t from-paper from-5% via-paper/55 via-50% to-transparent" />
           </>
         ) : (
           <div className="hero-glow absolute inset-0" />
@@ -277,7 +277,7 @@ export default async function Home() {
 
         {/* Сюда ведёт кнопка «Подробнее» в карточках наборов */}
         <RevealSection id="benefits" className="mt-24">
-          <p className="text-sm uppercase tracking-widest text-stone">Преимущества</p>
+          <p className="text-sm uppercase tracking-widest text-stone">О компонентах</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-ink sm:text-4xl">Что даёт каждый компонент</h2>
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
             {INGREDIENT_BENEFITS.map((group) => (
