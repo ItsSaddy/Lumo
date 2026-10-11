@@ -1,5 +1,7 @@
 export const WHATSAPP_PHONE = '992993333366' // код страны без «+» и без пробелов
-export const PHONE_DISPLAY = '+992 99 333 33 66'
+// Телефон для звонков (футер, документы) — отдельно от WhatsApp
+export const PHONE = '77479935395'
+export const PHONE_DISPLAY = '+7 747 993 53 95'
 
 // Пустая строка — пункт не показывается в футере и в документах
 export const EMAIL = 'lumo.help@bk.ru'

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { COMPANY, EMAIL, INSTAGRAM, INSTAGRAM_URL, PHONE_DISPLAY, WHATSAPP_PHONE, whatsappLink } from '@/lib/contacts'
+import { COMPANY, EMAIL, INSTAGRAM, INSTAGRAM_URL, PHONE, PHONE_DISPLAY, whatsappLink } from '@/lib/contacts'
 
 const NAV = [
   { href: '/#sets', label: 'Наборы' },
@@ -28,7 +28,8 @@ export default function Footer() {
   if (pathname.startsWith('/admin')) return null
 
   return (
-    <footer className="border-t border-mist/60 bg-mist/20">
+    <footer id="contacts" className="border-t border-mist/60 bg-mist/20">
+      {/* id="contacts" — сюда ведёт «Контакты» в шапке */}
       <div className="mx-auto max-w-6xl px-5 pb-10 pt-14 sm:px-8 sm:pt-20 md:px-10">
         <p className="metal-text font-display text-4xl font-bold leading-none tracking-[0.15em] sm:text-5xl">LUMO</p>
         <p className="mt-3 font-display text-base text-ink sm:text-lg">Ясность мысли. Сила тела.</p>
@@ -38,7 +39,7 @@ export default function Footer() {
             <p className={HEADING}>Свяжитесь с нами</p>
             <ul className="mt-4 flex flex-col gap-2.5">
               <li>
-                <a href={`tel:+${WHATSAPP_PHONE}`} className={`${LINK} whitespace-nowrap`}>{PHONE_DISPLAY}</a>
+                <a href={`tel:+${PHONE}`} className={`${LINK} whitespace-nowrap`}>{PHONE_DISPLAY}</a>
               </li>
               <li>
                 <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className={LINK}>WhatsApp</a>

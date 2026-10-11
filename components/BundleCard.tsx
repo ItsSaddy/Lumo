@@ -95,7 +95,7 @@ export default function BundleCard({ bundle, resolved }: { bundle: Product; reso
             {badge && <span className={`${CHIP} bg-plum text-ink`}>{badge}</span>}
           </div>
           <h2 className="mt-3 text-balance font-display text-3xl leading-tight text-ink">{bundle.name}</h2>
-          {bundle.description && <p className="mt-3 text-sm leading-relaxed text-stone">{bundle.description}</p>}
+          {bundle.description && <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-stone">{bundle.description}</p>}
 
           <p className="mt-5 text-[11px] uppercase tracking-widest text-stone">Состав набора</p>
           <ul className="mt-2 flex flex-col gap-2">
