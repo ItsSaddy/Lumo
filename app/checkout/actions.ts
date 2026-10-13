@@ -9,6 +9,7 @@ import { getProductVariants } from '@/lib/product-info'
 import { sendTelegram } from '@/lib/telegram'
 import { createKaspiQr, isKaspiConfigured, type KaspiQr } from '@/lib/kaspi'
 import type { Product } from '@/lib/types'
+import { fullPhone, parsePhone } from '@/lib/phone'
 
 type OrderInput = {
   customerName: string
@@ -61,6 +62,11 @@ async function pricesMatchCatalog(items: OrderInput['items']) {
 }
 
 export async function submitOrder(order: OrderInput) {
+  // Форма уже проверила номер — здесь страховка от запросов в обход формы
+  const phoneDigits = parsePhone(order.phone)
+  if (!phoneDigits) return { error: 'Проверьте номер телефона: нужно +7 и 10 цифр', orderId: null }
+  order = { ...order, phone: fullPhone(phoneDigits) }
+
   if (!(await pricesMatchCatalog(order.items))) {
     return { error: 'Цена некоторых товаров изменилась. Удалите их из корзины и добавьте заново.', orderId: null }
   }

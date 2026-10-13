@@ -2,20 +2,13 @@
 
 import { useState } from 'react'
 import { submitConsultation } from '@/app/consultation/actions'
+import PhoneInput from '@/components/PhoneInput'
 import { whatsappLink } from '@/lib/contacts'
+import { fullPhone, phoneError } from '@/lib/phone'
 
 // Поля — прозрачные рамки поверх карточки со свечением. «!» перебивает глобальный фон input из globals.css
-const FIELD = 'w-full rounded-lg border bg-transparent! border-stone/30 px-5 py-3.5 text-ink outline-none transition-colors placeholder:text-stone/60 focus:border-brass'
-
-// Храним только 10 цифр после +7 и показываем их как (701) 234-56-78
-function formatPhone(digits: string) {
-  const [code, a, b, c] = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 8), digits.slice(8, 10)]
-  let out = code ? `(${code}` : ''
-  if (a) out += `) ${a}`
-  if (b) out += `-${b}`
-  if (c) out += `-${c}`
-  return out
-}
+const FIELD_FRAME = 'w-full rounded-lg px-5 py-3.5'
+const FIELD = `${FIELD_FRAME} border bg-transparent! border-stone/30 text-ink outline-none transition-colors placeholder:text-stone/60 focus:border-brass`
 
 function WhatsAppIcon({ className }: { className: string }) {
   return (
@@ -27,32 +20,27 @@ function WhatsAppIcon({ className }: { className: string }) {
 
 export default function ConsultationForm() {
   const [name, setName] = useState('')
+  // Только 10 цифр после +7; ошибку показываем после ухода с поля или попытки отправить — не во время набора
   const [phone, setPhone] = useState('')
+  const [phoneTouched, setPhoneTouched] = useState(false)
   const [email, setEmail] = useState('')
   const [website, setWebsite] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
 
-  function handlePhoneChange(raw: string) {
-    const digits = raw.replace(/\D/g, '')
-    // «8» в начале — привычный междугородний префикс, а не часть номера после +7
-    if (phone.length === 0 && digits === '8') return
-    // Вставили номер целиком: +7 701 … или 8 701 … — отбрасываем код страны
-    const next = digits.length > 10 && phone.length < 10 && /^[78]/.test(digits) ? digits.slice(1) : digits
-    setPhone(next.slice(0, 10))
-  }
+  const phoneMessage = phoneTouched ? phoneError(phone) : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (phone.length < 10) {
-      setError('Укажите номер телефона полностью')
+    if (phoneError(phone)) {
+      setPhoneTouched(true)
       return
     }
     setLoading(true)
     setError(null)
 
-    const result = await submitConsultation({ name, phone: `+7 ${formatPhone(phone)}`, email, website })
+    const result = await submitConsultation({ name, phone: fullPhone(phone), email, website })
 
     setLoading(false)
     if (result.error) {
@@ -76,12 +64,8 @@ export default function ConsultationForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <input type="text" placeholder="Ваше имя" aria-label="Ваше имя" autoComplete="name" required
         value={name} onChange={(e) => setName(e.target.value)} className={FIELD} />
-      <label className={`${FIELD} flex cursor-text items-center gap-2 focus-within:border-brass`}>
-        <span className="text-ink">+7</span>
-        <input type="tel" inputMode="numeric" placeholder="(000) 000-00-00" aria-label="Телефон" autoComplete="tel-national" required
-          value={formatPhone(phone)} onChange={(e) => handlePhoneChange(e.target.value)}
-          className="min-w-0 flex-1 bg-transparent! text-ink outline-none placeholder:text-stone/60" />
-      </label>
+      <PhoneInput id="consultation-phone" value={phone} onChange={setPhone} onBlur={() => setPhoneTouched(true)}
+        error={phoneMessage} className={FIELD_FRAME} />
       <input type="email" placeholder="Ваш email (необязательно)" aria-label="Email" autoComplete="email"
         value={email} onChange={(e) => setEmail(e.target.value)} className={FIELD} />
       {/* Ловушка для ботов: поле скрыто от людей и от скринридеров */}

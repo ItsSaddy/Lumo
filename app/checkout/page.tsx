@@ -9,12 +9,16 @@ import { formatPrice } from '@/lib/format'
 import { KASPI_PAY_LINK } from '@/lib/contacts'
 import type { KaspiQr } from '@/lib/kaspi'
 import KaspiPayment from '@/components/KaspiPayment'
+import PhoneInput from '@/components/PhoneInput'
+import { fullPhone, phoneError } from '@/lib/phone'
 import { createOrderQr, submitOrder } from './actions'
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const [name, setName] = useState('')
+  // Только 10 цифр после +7; ошибку показываем после ухода с поля или попытки отправить — не во время набора
   const [phone, setPhone] = useState('')
+  const [phoneTouched, setPhoneTouched] = useState(false)
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,12 +29,16 @@ export default function CheckoutPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (phoneError(phone)) {
+      setPhoneTouched(true)
+      return
+    }
     setLoading(true)
     setError(null)
 
     const result = await submitOrder({
       customerName: name,
-      phone,
+      phone: fullPhone(phone),
       address,
       items: items.map((item) => ({
         id: item.productId ?? item.id,
@@ -144,10 +152,10 @@ export default function CheckoutPage() {
             className="w-full rounded border border-stone/30 px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Телефон</label>
-          <input type="tel" placeholder="+7 ___ ___ __ __" value={phone}
-            onChange={(e) => setPhone(e.target.value)} required
-            className="w-full rounded border border-stone/30 px-4 py-2.5 text-ink outline-none transition-colors focus:border-brass" />
+          <label htmlFor="checkout-phone" className="mb-1 block text-xs uppercase tracking-wide text-stone">Телефон</label>
+          {/* bg-mist — как у остальных полей формы: у них фон задаёт глобальное правило для input */}
+          <PhoneInput id="checkout-phone" value={phone} onChange={setPhone} onBlur={() => setPhoneTouched(true)}
+            error={phoneTouched ? phoneError(phone) : null} className="w-full rounded bg-mist px-4 py-2.5" />
         </div>
         <div>
           <label className="mb-1 block text-xs uppercase tracking-wide text-stone">Адрес доставки</label>
