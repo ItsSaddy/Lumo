@@ -47,6 +47,8 @@ Core tables (inferred from queries, no migrations in this repo): `products`, `or
 
 **Admin**: [app/admin/actions.ts](app/admin/actions.ts) has the product CRUD Server Actions (`addProduct`/`updateProduct`/`deleteProduct`/`moveProduct`), each re-checking auth and revalidating `/admin`, `/` and `/shop` after writes. Bundles and regular products are listed (and reordered) as separate groups. [app/admin/clients](app/admin/clients/page.tsx) lists submitted orders with their line items (bundle composition expanded) via a nested Supabase select.
 
+**SEO**: the canonical origin is `SITE_URL` in [lib/site.ts](lib/site.ts) (`metadataBase` in [app/layout.tsx](app/layout.tsx), title template `%s — <brand>` — pages set short titles plus `alternates.canonical`). [app/robots.ts](app/robots.ts) closes `/admin`, `/cart`, `/checkout`, `/api`; [app/sitemap.ts](app/sitemap.ts) is a static list (add product URLs there once products get their own pages); the share preview is `app/opengraph-image.jpg`; [app/admin/layout.tsx](app/admin/layout.tsx) adds `noindex`.
+
 **Styling**: Tailwind v4 (CSS-based config via `@theme inline` in [app/globals.css](app/globals.css), no `tailwind.config.*`). Custom semantic color tokens: `ink`, `stone`, `brass`, `plum`, `paper`, `mist` — reuse these rather than raw Tailwind palette colors. Fonts are `next/font/google` (Unbounded → `--font-display`, Manrope → `--font-sans`, Golos Text → `--font-price`; only the weights actually used are loaded), wired up in [app/layout.tsx](app/layout.tsx).
 
 ## Environment variables

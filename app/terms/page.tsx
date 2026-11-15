@@ -3,7 +3,8 @@ import LegalPage from '@/components/LegalPage'
 import { CONTACT_LINE, LEGAL_UPDATED, OPERATOR, SITE_DOMAIN } from '@/lib/legal'
 
 export const metadata: Metadata = {
-  title: 'Пользовательское соглашение — Lumo',
+  title: 'Пользовательское соглашение',
+  alternates: { canonical: '/terms' },
 }
 
 export default function TermsPage() {

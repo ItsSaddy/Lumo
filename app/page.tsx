@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createPublicClient } from '@/lib/supabase/public'
@@ -134,6 +135,10 @@ const FAQ = [
     a: 'Обычно в течение часа в рабочее время — позвоним или напишем на номер, указанный в заявке, чтобы подтвердить заказ и договориться о доставке.',
   },
 ]
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+}
 
 // Страница статическая; обновляется сразу после правок в админке и страховочно раз в час
 export const revalidate = 3600

@@ -3,7 +3,8 @@ import LegalPage from '@/components/LegalPage'
 import { CONTACT_LINE, LEGAL_UPDATED, OPERATOR, PERSONAL_DATA_LAW, SITE_DOMAIN } from '@/lib/legal'
 
 export const metadata: Metadata = {
-  title: 'Согласие на обработку персональных данных — Lumo',
+  title: 'Согласие на обработку персональных данных',
+  alternates: { canonical: '/consent' },
 }
 
 export default function ConsentPage() {

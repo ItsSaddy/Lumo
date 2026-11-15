@@ -3,7 +3,8 @@ import LegalPage from '@/components/LegalPage'
 import { CONTACT_LINE, LEGAL_UPDATED, OPERATOR, PERSONAL_DATA_LAW, SITE_DOMAIN } from '@/lib/legal'
 
 export const metadata: Metadata = {
-  title: 'Политика конфиденциальности — Lumo',
+  title: 'Политика конфиденциальности',
+  alternates: { canonical: '/privacy' },
 }
 
 export default function PrivacyPage() {

@@ -7,8 +7,9 @@ import CatalogGrid from '@/components/CatalogGrid'
 import ConsultationSection from '@/components/ConsultationSection'
 
 export const metadata: Metadata = {
-  title: 'Магазин — Lumo',
-  description: 'Экстракты, капсулы и паучи LUMO по отдельности',
+  title: 'Магазин',
+  description: 'Экстракты ежовика и кордицепса, капсулы и энергетические паучи LUMO по отдельности — с доставкой по Казахстану и рассрочкой Kaspi.',
+  alternates: { canonical: '/shop' },
 }
 
 // Как и главная: статическая, обновляется после правок в админке и страховочно раз в час
